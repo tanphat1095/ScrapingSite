@@ -88,6 +88,9 @@ class Meilleurgaragistes_fr(BaseSite):
             for i_ in span_:
                 if i_.get('class')== 'street-address text-hide-mobile':
                     ven.street = i_.text
+                    if ven.street!=None:
+                        if ven.street.strip()=='.':
+                            ven.street= None
                 if i_.get('class')=='postal-code':
                     ven.zipcode = i_.text
                     if ven.zipcode !=None  and len(ven.zipcode)>0 and ven.zipcode.isdigit() :
@@ -123,9 +126,12 @@ class Meilleurgaragistes_fr(BaseSite):
                     
             (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
             ven.country='fr'
+            desc = xmlBody.find('.//p[@id="description"]')
+            if desc!=None:
+                ven.description = ' '.join(desc.itertext())
             return ven
         
-        ###aaabbb
+        ###
 
     def __ServicesParser(self,url,xmlServices):     
             ''

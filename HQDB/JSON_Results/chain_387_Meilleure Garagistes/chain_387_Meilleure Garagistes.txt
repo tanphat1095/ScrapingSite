@@ -1,3 +1,6 @@
-INFO:root:r Hospice, PAVILLY, 76570,fr: cannot get GEO code
-ERROR:root:https://www.meilleur-garagiste.com/annuaire/siligom-bossard-pneus-sarl-adherent.454607.html: invalid GEO code (47.0714586,-0.8612537)
-INFO:root:116 av John Kennedy, BRIVE LA GAILLARDE, 19100,fr: cannot get GEO code
+ERROR:root:https://www.meilleur-garagiste.com/annuaire/garage-massot.442242.html: invalid GEO code (43.6761718,1.3223601)
+INFO:root:ZA, RAUCOURT ET FLABA, 08450,fr: cannot get GEO code
+ERROR:root:https://www.meilleur-garagiste.com/annuaire/ford-garage-lesnis-agen.447222.html: invalid GEO code (49.290965,0.19682)
+ERROR:root:https://www.meilleur-garagiste.com/annuaire/mercedes-benz-garage-paoli-joseph-distributeur.455793.html: invalid GEO code (42.2519234,9.1702595)
+INFO:root:rte de Vannes, NOYAL PONTIVY, 56920,fr: cannot get GEO code
+INFO:root:29 Bis av Gambetta, BLOIS, 41000,fr: cannot get GEO code
