@@ -1,0 +1,208 @@
+{
+    "adid": null, 
+    "name": "Main Car", 
+    "name_of_contact": null, 
+    "scrape_page": "https://www.meilleur-garagiste.com/annuaire/main-car.452604.html", 
+    "business_website": null, 
+    "areas_covered": null, 
+    "description": null, 
+    "img_link": null, 
+    "hqdb_featured_ad_type": null, 
+    "hqdb_nr_reviews": null, 
+    "hqdb_review_score": null, 
+    "accreditations": null, 
+    "category": null, 
+    "subcategory": null, 
+    "street": "1610 bd Salvador Allende", 
+    "city": "SORGUES", 
+    "zipcode": "84700", 
+    "formatted_address": "1610 bd Salvador Allende, SORGUES, 84700", 
+    "country": "fr", 
+    "office_number": "0490830388", 
+    "office_number2": null, 
+    "mobile_number": null, 
+    "mobile_number2": null, 
+    "unidentified_phone_numbers": null, 
+    "latitude": null, 
+    "longitude": null, 
+    "business_email": null, 
+    "yelp_page": null, 
+    "facebook": null, 
+    "twitter": null, 
+    "instagram": null, 
+    "venue_images": "https://www.meilleur-garagiste.com/images/autolia/picto-pro-default.jpg", 
+    "opening_hours_raw": null, 
+    "pricelist_link": [
+        "https://www.meilleur-garagiste.com/annuaire/main-car.452604.html"
+    ], 
+    "services": [
+        {
+            "service_category": null, 
+            "service": "Allumage", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Amortisseurs", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Batterie Alternateur Démarreur", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Batterie Start and Stop", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Courroie de distribution", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Direction assistée", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Echappement catalyseur", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Eclairage et visibilité", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Embrayage", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Freinage", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Injection diesel", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Injection essence", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Liaison au sol", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Plaque d'immatriculation", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Pneumatique", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Pré-contrôle technique", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Refroidissement Moteur", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Réglage anti-pollution", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Réglage train avant", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Réparation moteur / changement turbo", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Révision constructeur", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Roulement de roues", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Transmission", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Vidange", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }
+    ]
+}

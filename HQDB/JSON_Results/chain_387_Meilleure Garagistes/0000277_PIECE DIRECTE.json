@@ -1,0 +1,47 @@
+{
+    "adid": null, 
+    "name": "PIECE DIRECTE", 
+    "name_of_contact": null, 
+    "scrape_page": "https://www.meilleur-garagiste.com/annuaire/piece-directe.441836.html", 
+    "business_website": null, 
+    "areas_covered": null, 
+    "description": null, 
+    "img_link": null, 
+    "hqdb_featured_ad_type": null, 
+    "hqdb_nr_reviews": null, 
+    "hqdb_review_score": null, 
+    "accreditations": null, 
+    "category": null, 
+    "subcategory": null, 
+    "street": "ZI les Botiaux", 
+    "city": "LIBERCOURT", 
+    "zipcode": "62820", 
+    "formatted_address": "ZI les Botiaux, LIBERCOURT, 62820", 
+    "country": "fr", 
+    "office_number": "0321296070", 
+    "office_number2": null, 
+    "mobile_number": null, 
+    "mobile_number2": null, 
+    "unidentified_phone_numbers": null, 
+    "latitude": "50.4823891", 
+    "longitude": "2.9772932", 
+    "business_email": null, 
+    "yelp_page": null, 
+    "facebook": null, 
+    "twitter": null, 
+    "instagram": null, 
+    "venue_images": "https://www.meilleur-garagiste.com/images/autolia/picto-pro-default.jpg", 
+    "opening_hours_raw": null, 
+    "pricelist_link": [
+        "https://www.meilleur-garagiste.com/annuaire/piece-directe.441836.html"
+    ], 
+    "services": [
+        {
+            "service_category": null, 
+            "service": "Vente de pièces détachées pour automobile", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }
+    ]
+}

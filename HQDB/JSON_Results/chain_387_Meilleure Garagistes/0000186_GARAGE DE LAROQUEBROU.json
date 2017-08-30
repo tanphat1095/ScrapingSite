@@ -1,0 +1,264 @@
+{
+    "adid": null, 
+    "name": "GARAGE DE LAROQUEBROU", 
+    "name_of_contact": null, 
+    "scrape_page": "https://www.meilleur-garagiste.com/annuaire/garage-de-laroquebrou.442189.html", 
+    "business_website": null, 
+    "areas_covered": null, 
+    "description": null, 
+    "img_link": null, 
+    "hqdb_featured_ad_type": null, 
+    "hqdb_nr_reviews": null, 
+    "hqdb_review_score": null, 
+    "accreditations": null, 
+    "category": null, 
+    "subcategory": null, 
+    "street": "Rue du 11 juin 1944", 
+    "city": "LAROQUEBROU", 
+    "zipcode": "15150", 
+    "formatted_address": "Rue du 11 juin 1944, LAROQUEBROU, 15150", 
+    "country": "fr", 
+    "office_number": "0471460024", 
+    "office_number2": null, 
+    "mobile_number": null, 
+    "mobile_number2": null, 
+    "unidentified_phone_numbers": null, 
+    "latitude": "44.9655259", 
+    "longitude": "2.194367", 
+    "business_email": null, 
+    "yelp_page": null, 
+    "facebook": null, 
+    "twitter": null, 
+    "instagram": null, 
+    "venue_images": "https://www.meilleur-garagiste.com/images/logo/logo-442189.jpg", 
+    "opening_hours_raw": null, 
+    "pricelist_link": [
+        "https://www.meilleur-garagiste.com/annuaire/garage-de-laroquebrou.442189.html"
+    ], 
+    "services": [
+        {
+            "service_category": null, 
+            "service": "Allumage", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Amortisseurs", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Attelage", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Batterie Alternateur Démarreur", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Batterie Start and Stop", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Boite automatique", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Climatisation", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Courroie de distribution", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Diagnostic électronique", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Direction assistée", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Dispositif de sécurité AirBag", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Echappement catalyseur", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Eclairage et visibilité", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Electronique embarquée", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Embrayage", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Freinage", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Injection diesel", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Injection essence", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Liaison au sol", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Ordinateur de bord", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Pare-brise", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Plaque d'immatriculation", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Pneumatique", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Pré-contrôle technique", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Refroidissement Moteur", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Réglage anti-pollution", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Réglage train avant", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Réparation moteur / changement turbo", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Révision constructeur", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Roulement de roues", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Transmission", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Vidange", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }
+    ]
+}

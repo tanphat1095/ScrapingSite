@@ -1,0 +1,3 @@
+INFO:root:r Hospice, PAVILLY, 76570,fr: cannot get GEO code
+ERROR:root:https://www.meilleur-garagiste.com/annuaire/siligom-bossard-pneus-sarl-adherent.454607.html: invalid GEO code (47.0714586,-0.8612537)
+INFO:root:116 av John Kennedy, BRIVE LA GAILLARDE, 19100,fr: cannot get GEO code

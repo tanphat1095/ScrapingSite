@@ -1,0 +1,14 @@
+INFO:root:Sully House, 7 Clovelly Road Industrial Estate, Bideford, EX39 3HN,gb: cannot get GEO code
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/lyn-financial-services-493826?hash=8645013: invalid GEO code (51.0647053,-4.088895)
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/perrins-financial-services-ltd-511441?hash=8645013: invalid GEO code (51.078452631093,-4.058998932131)
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/mark-walker-financial-services-518041?hash=8645013: invalid GEO code (51.085932700241,-4.078995947572)
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/philip-j-milton-company-plc-500469?hash=8645013: invalid GEO code (51.08098277519,-4.057312089078)
+INFO:root:Badgers Drift, West Down, Devon, Ilfracombe, EX34 8NH,gb: cannot get GEO code
+INFO:root:Manor Office, North Street, Crediton, Devon, EX17 2BR,gb: cannot get GEO code
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/hansford-bell-chartered-financial-planners-508995?hash=8645013: invalid GEO code (50.5492086,-4.1478523)
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/barry-w-p-bennett-of-raymond-james-investment-services-514752?hash=8645013: invalid GEO code (50.491651743479,-4.08326385629)
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/bryan-j-hollingsworth-acii-dippfs-cemap-487439?hash=8645013: invalid GEO code (50.7267032,-3.5349554)
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/gilbert-stephens-financial-services-ltd-515317?hash=8645013: invalid GEO code (50.7237823,-3.5259059)
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/the-fry-group-515457?hash=8645013: invalid GEO code (50.723243285331,-3.525720499894)
+INFO:root:Fairstone Financial Management, Bideford, EX39 4AY,gb: cannot get GEO code
+ERROR:root:https://www.unbiased.co.uk/profile/financial-adviser/thompson-jenner-financial-services-ltd-512040?hash=8645013: invalid GEO code (50.7182131,-3.5288274)

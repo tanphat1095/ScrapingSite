@@ -1,0 +1,16 @@
+{Site URL} ; { Package.Site_Name } ; { Class_Name}
+https://www.template.com ; SiteObjects.Site_TEMPLATE ; TEMPLATE
+https://www.flexerent.co.uk; SiteObjects.chain_281_Burnt-Tree_uk; Burnt_Tree_uk
+http://www.willowsvetgroup.co.uk; SiteObjects.chain_282_WillowsVetGroup_uk; WillowsVetGroup_uk
+http://www.myvets.co.uk; SiteObjects.chain_283_MyVets_uk; MyVets_uk
+http://www.arenalingua.de; SiteObjects.chain_263_ArenaLingua_de; ArenaLingua_de
+http://www.bodystyling.be; SiteObjects.chain_253_BodyStyling_be; BodyStyling_be
+http://www.minstervets.co.uk; SiteObjects.chain_284_MinsterVets_uk; MinsterVets_uk
+https://www.trustatrader.com; SiteObjects.chain_252_TrustATrader_gb; TrustATrader_gb
+https://www.avis.co.uk; SiteObjects.chain_194_Avis_uk; Avis_uk
+https://www.gumtree.com; SiteObjects.chain_251_Gumtree_gb; Gumtree_gb
+http://www.checkatrade.com; SiteObjects.chain_333_CheckATrade_fr; CheckATrade_fr
+https://www.unbiased.co.uk; SiteObjects.chain_374_Unbiased_gb; Unbiased_gb
+http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm.html; SiteObjects.chain_373_Acca_gb; Acca_gb
+http://www.wiki.com; SiteObjects.getPostCodeEng; getPostCodeEng
+https://www.meilleur-garagiste.com; SiteObjects.chain_387_Meilleurgaragistes_fr; Meilleurgaragistes_fr

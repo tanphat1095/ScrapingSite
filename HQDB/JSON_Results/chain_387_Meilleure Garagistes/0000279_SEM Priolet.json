@@ -1,0 +1,47 @@
+{
+    "adid": null, 
+    "name": "SEM Priolet", 
+    "name_of_contact": null, 
+    "scrape_page": "https://www.meilleur-garagiste.com/annuaire/sem-priolet.441947.html", 
+    "business_website": null, 
+    "areas_covered": null, 
+    "description": null, 
+    "img_link": null, 
+    "hqdb_featured_ad_type": null, 
+    "hqdb_nr_reviews": null, 
+    "hqdb_review_score": null, 
+    "accreditations": null, 
+    "category": null, 
+    "subcategory": null, 
+    "street": "2 rue du Port Villiers", 
+    "city": "CHALON-SUR-SAÔNE", 
+    "zipcode": "71100", 
+    "formatted_address": "2 rue du Port Villiers, CHALON-SUR-SAÔNE, 71100", 
+    "country": "fr", 
+    "office_number": "0385480982", 
+    "office_number2": null, 
+    "mobile_number": null, 
+    "mobile_number2": null, 
+    "unidentified_phone_numbers": null, 
+    "latitude": "46.780224", 
+    "longitude": "4.854822", 
+    "business_email": null, 
+    "yelp_page": null, 
+    "facebook": null, 
+    "twitter": null, 
+    "instagram": null, 
+    "venue_images": "https://www.meilleur-garagiste.com/images/logo/logo-441947.png", 
+    "opening_hours_raw": null, 
+    "pricelist_link": [
+        "https://www.meilleur-garagiste.com/annuaire/sem-priolet.441947.html"
+    ], 
+    "services": [
+        {
+            "service_category": null, 
+            "service": "Vente de pièces détachées pour automobile", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }
+    ]
+}

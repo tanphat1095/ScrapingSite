@@ -1,0 +1,47 @@
+{
+    "adid": null, 
+    "name": "A3P", 
+    "name_of_contact": null, 
+    "scrape_page": "https://www.meilleur-garagiste.com/annuaire/a3p.441937.html", 
+    "business_website": null, 
+    "areas_covered": null, 
+    "description": null, 
+    "img_link": null, 
+    "hqdb_featured_ad_type": null, 
+    "hqdb_nr_reviews": null, 
+    "hqdb_review_score": null, 
+    "accreditations": null, 
+    "category": null, 
+    "subcategory": null, 
+    "street": "393 rue André et Edouard Michelin", 
+    "city": "SAINT DOULCHARD", 
+    "zipcode": "18230", 
+    "formatted_address": "393 rue André et Edouard Michelin, SAINT DOULCHARD, 18230", 
+    "country": "fr", 
+    "office_number": "0248243666", 
+    "office_number2": null, 
+    "mobile_number": null, 
+    "mobile_number2": null, 
+    "unidentified_phone_numbers": null, 
+    "latitude": "47.1044645", 
+    "longitude": "2.3875784", 
+    "business_email": null, 
+    "yelp_page": null, 
+    "facebook": null, 
+    "twitter": null, 
+    "instagram": null, 
+    "venue_images": "https://www.meilleur-garagiste.com/images/autolia/picto-pro-default.jpg", 
+    "opening_hours_raw": null, 
+    "pricelist_link": [
+        "https://www.meilleur-garagiste.com/annuaire/a3p.441937.html"
+    ], 
+    "services": [
+        {
+            "service_category": null, 
+            "service": "Vente de pièces détachées pour automobile", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }
+    ]
+}

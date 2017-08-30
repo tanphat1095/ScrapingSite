@@ -1,0 +1,82 @@
+{
+    "adid": null, 
+    "name": "GARAGE DU PINET", 
+    "name_of_contact": null, 
+    "scrape_page": "https://www.meilleur-garagiste.com/annuaire/garage-du-pinet.442230.html", 
+    "business_website": null, 
+    "areas_covered": null, 
+    "description": null, 
+    "img_link": null, 
+    "hqdb_featured_ad_type": null, 
+    "hqdb_nr_reviews": null, 
+    "hqdb_review_score": null, 
+    "accreditations": null, 
+    "category": null, 
+    "subcategory": null, 
+    "street": "ZA du Pinet, RN 88 Route d'Albi", 
+    "city": "ROUFFIAC TOLOSAN", 
+    "zipcode": "31180", 
+    "formatted_address": "ZA du Pinet, RN 88 Route d'Albi, ROUFFIAC TOLOSAN, 31180", 
+    "country": "fr", 
+    "office_number": "0561746128", 
+    "office_number2": null, 
+    "mobile_number": null, 
+    "mobile_number2": null, 
+    "unidentified_phone_numbers": null, 
+    "latitude": "43.671464", 
+    "longitude": "1.5192128", 
+    "business_email": null, 
+    "yelp_page": null, 
+    "facebook": null, 
+    "twitter": null, 
+    "instagram": null, 
+    "venue_images": "https://www.meilleur-garagiste.com/images/logo/logo-442230.jpg", 
+    "opening_hours_raw": null, 
+    "pricelist_link": [
+        "https://www.meilleur-garagiste.com/annuaire/garage-du-pinet.442230.html"
+    ], 
+    "services": [
+        {
+            "service_category": null, 
+            "service": "Eclairage et visibilité", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Freinage", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Pare-brise", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Plaque d'immatriculation", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Pneumatique", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Vidange", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }
+    ]
+}

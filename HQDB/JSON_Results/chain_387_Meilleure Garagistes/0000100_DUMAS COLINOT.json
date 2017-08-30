@@ -1,0 +1,47 @@
+{
+    "adid": null, 
+    "name": "DUMAS COLINOT", 
+    "name_of_contact": null, 
+    "scrape_page": "https://www.meilleur-garagiste.com/annuaire/dumas-colinot.441830.html", 
+    "business_website": null, 
+    "areas_covered": null, 
+    "description": null, 
+    "img_link": null, 
+    "hqdb_featured_ad_type": null, 
+    "hqdb_nr_reviews": null, 
+    "hqdb_review_score": null, 
+    "accreditations": null, 
+    "category": null, 
+    "subcategory": null, 
+    "street": "16 Rue Gay Lussac", 
+    "city": "VARENNES-VAUZELLES", 
+    "zipcode": "58640", 
+    "formatted_address": "16 Rue Gay Lussac, VARENNES-VAUZELLES, 58640", 
+    "country": "fr", 
+    "office_number": "0386719212", 
+    "office_number2": null, 
+    "mobile_number": null, 
+    "mobile_number2": null, 
+    "unidentified_phone_numbers": null, 
+    "latitude": "47.0247753", 
+    "longitude": "3.1501262", 
+    "business_email": null, 
+    "yelp_page": null, 
+    "facebook": null, 
+    "twitter": null, 
+    "instagram": null, 
+    "venue_images": "https://www.meilleur-garagiste.com/images/autolia/picto-pro-default.jpg", 
+    "opening_hours_raw": null, 
+    "pricelist_link": [
+        "https://www.meilleur-garagiste.com/annuaire/dumas-colinot.441830.html"
+    ], 
+    "services": [
+        {
+            "service_category": null, 
+            "service": "Vente de pièces détachées pour automobile", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }
+    ]
+}
