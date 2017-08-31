@@ -125,7 +125,7 @@ class Meilleurgaragistes_fr(BaseSite):
             else:
                 add_ = ven.city+', '+ven.zipcode
                     
-            (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
+           # (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
             ven.country='fr'
             desc = xmlBody.find('.//p[@id="description"]')
             desc_ =''
@@ -136,14 +136,26 @@ class Meilleurgaragistes_fr(BaseSite):
             title = xmlBody.find('.//div[@class="container"]//h2')
             if title !=None and desc !=None:
                 desc_  = title.text+ ' | '+ desc_
-            
+            img_link_arr = []
             desc_ = self.replace__(desc_)
-            desc_ = self.replaceSame(desc_, '||', '|')
+            desc_ = self.replaceSame(desc_, '||', '|').replace('|',' | ')
             ven.description =desc_
             
             img_link = xmlBody.find('.//div[@class="realisations"]/img')
             if img_link!=None:
-                ven.img_link = [self.__url__+ img_link.get('src')]
+                temp_img  =   ven.img_link = self.__url__+ img_link.get('src')
+                img_link_arr.append(temp_img)
+            multi_img =  xmlBody.xpath('//div[@class="3photo realisations"]/div/img')
+            for it in multi_img:
+                temp_ml = self.__url__+ it.get('src')
+                img_link_arr.append(temp_ml)
+                
+                
+            ven.img_link = img_link_arr
+            
+            nr_reviewer = xmlBody.xpath('//div[@class="avisoperation row"]')
+            if len(nr_reviewer)>0:
+                ven.hqdb_nr_reviews = str(len(nr_reviewer))
             return ven
 
     def __ServicesParser(self,url,xmlServices):     
