@@ -31,6 +31,7 @@ if __name__ == '__main__':
 #    a ='00000100000000'
 #    a= int(a)
 #    print str(len(str(a)))
+   
 
         
    

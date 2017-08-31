@@ -89,6 +89,7 @@ class Meilleurgaragistes_fr(BaseSite):
                 if i_.get('class')== 'street-address text-hide-mobile':
                     ven.street = i_.text
                     if ven.street!=None:
+                        ven.street = self.validateStreet(ven.street)
                         if ven.street.strip()=='.':
                             ven.street= None
                 if i_.get('class')=='postal-code':
@@ -127,8 +128,22 @@ class Meilleurgaragistes_fr(BaseSite):
             (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
             ven.country='fr'
             desc = xmlBody.find('.//p[@id="description"]')
+            desc_ =''
             if desc!=None:
-                ven.description = ' '.join(desc.itertext())
+                
+                desc_ = ''.join(desc.itertext()).strip().replace('\n','|').replace('\t','')
+            
+            title = xmlBody.find('.//div[@class="container"]//h2')
+            if title !=None and desc !=None:
+                desc_  = title.text+ ' | '+ desc_
+            
+            desc_ = self.replace__(desc_)
+            desc_ = self.replaceSame(desc_, '||', '|')
+            ven.description =desc_
+            
+            img_link = xmlBody.find('.//div[@class="realisations"]/img')
+            if img_link!=None:
+                ven.img_link = [self.__url__+ img_link.get('src')]
             return ven
 
     def __ServicesParser(self,url,xmlServices):     
@@ -155,4 +170,25 @@ class Meilleurgaragistes_fr(BaseSite):
                 return (None,None)
         except Exception,ex:
             return (None,None)
-        
+    def replaceSame(self, string, old_,new_):
+        for i in range(0, 5):
+            string = string.replace(old_,new_)
+        return string
+    def replace__(self,string):
+        arrays= string.split('|')
+        if len(arrays)>0:
+            for i in range(0,len(arrays)):
+                arrays[i] = arrays[i].strip()
+        return '|'.join(arrays)
+    def validateStreet(self,String_):
+        #String_ = '3029 LA LAURAGAISE ROUTE DE BAZIEGE BP 78178'
+        array_ = String_.split()
+        if len(array_)>1:
+            if array_[len(array_)-1].isdigit() and array_[len(array_)-2] =='BP':
+                return ' '.join(array_[0:len(array_)-2])
+            if  array_[len(array_)-1].isdigit() and array_[len(array_)-2] =='PB':
+                return ' '.join(array_[0:len(array_)-2])
+            else:
+                return String_
+        else:
+            return String_
