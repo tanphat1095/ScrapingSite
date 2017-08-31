@@ -130,8 +130,6 @@ class Meilleurgaragistes_fr(BaseSite):
             if desc!=None:
                 ven.description = ' '.join(desc.itertext())
             return ven
-        
-        ###
 
     def __ServicesParser(self,url,xmlServices):     
             ''

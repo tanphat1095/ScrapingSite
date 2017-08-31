@@ -5,6 +5,7 @@ import json
 from collections import OrderedDict
 import Common.Validation as Validator
 from Common import Util
+from mongoengine.fields import URLField, EmailField
 import codecs
  
 class Venue(object):    
@@ -125,11 +126,24 @@ class Venue(object):
         self.name = Validator.ReValidString(self.name)
         self.name_of_contact = Validator.ReValidString(self.name_of_contact)        
         self.business_website = Validator.RevalidURL(self.business_website)
+        if self.business_website != None:
+            try:
+                mongo_validator = URLField()
+                mongo_validator.validate(self.business_website)
+            except:
+                Util.log.invalid(self.business_website,self.business_website + ': Invalid URL')
+                self.business_website = None                
         self.areas_covered = Validator.ReValidString(self.areas_covered)
         self.formatted_address = Validator.ReValidString(self.formatted_address)
-        self.description = Validator.ReValidString(self.description)
-        if self.img_link != None and len(self.img_link) == 0:
-            self.img_link = None
+        self.description = Validator.ReValidString(self.description)        
+        if self.img_link != None and len(self.img_link) > 0:
+            for i in range(len(self.img_link)):
+                if Validator.is_valid_url(self.img_link[i]) == None:
+                    Util.log.invalid(self.img_link,"Invalid URL: " + self.img_link[i])
+                else:
+                    self.img_link[i] = Validator.RevalidURL(self.img_link[i])
+            self.img_link = [Validator.ReValidString(x) for x in self.img_link]
+            self.img_link = [x for x in self.img_link if x != None]
         self.hqdb_featured_ad_type = Validator.ReValidString(self.hqdb_featured_ad_type)
         self.hqdb_nr_reviews = Validator.ReValidString(self.hqdb_nr_reviews)
         self.hqdb_review_score = Validator.ReValidString(self.hqdb_review_score)        
@@ -158,11 +172,22 @@ class Venue(object):
         self.latitude = Validator.ReValidString(self.latitude)
         self.longitude = Validator.ReValidString(self.longitude)
         self.business_email = Validator.RevalidEmail(Validator.ReValidString(self.business_email))
+        if self.business_email != None:
+            try:
+                mongo_validator = EmailField()
+                mongo_validator.validate(self.business_email)
+            except:
+                Util.log.invalid(self.business_email,self.business_email + ': Invalid Email')
+                self.business_email = None
         self.yelp_page = Validator.RevalidURL(self.yelp_page)
         self.facebook = Validator.RevalidURL(self.facebook)
         self.twitter = Validator.RevalidURL(self.twitter)
         self.instagram = Validator.RevalidURL(self.instagram)
-        self.venue_images = Validator.ReValidString(self.venue_images)        
+        self.venue_images = Validator.ReValidString(self.venue_images) 
+        if self.venue_images != None and Validator.is_valid_url(self.venue_images) == None:
+            Util.log.invalid(self.venue_images,"Invalid URL" + self.venue_images)
+        elif self.venue_images != None:
+            self.venue_images = Validator.RevalidURL(self.venue_images)
         if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude) == False:            
             Util.log.invalid('GEO code',self.scrape_page + ': invalid GEO code (' + self.latitude + ',' + self.longitude + ')')
             self.latitude = None
