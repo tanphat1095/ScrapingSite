@@ -125,7 +125,9 @@ class Meilleurgaragistes_fr(BaseSite):
             else:
                 add_ = ven.city+', '+ven.zipcode
                     
-           # (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
+            (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
+            
+            
             ven.country='fr'
             desc = xmlBody.find('.//p[@id="description"]')
             desc_ =''
@@ -150,9 +152,8 @@ class Meilleurgaragistes_fr(BaseSite):
                 temp_ml = self.__url__+ it.get('src')
                 img_link_arr.append(temp_ml)
                 
-                
-            ven.img_link = img_link_arr
-            
+            if len(img_link_arr)>0:
+                ven.img_link = img_link_arr
             nr_reviewer = xmlBody.xpath('//div[@class="avisoperation row"]')
             if len(nr_reviewer)>0:
                 ven.hqdb_nr_reviews = str(len(nr_reviewer))

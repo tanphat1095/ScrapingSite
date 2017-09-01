@@ -5,10 +5,14 @@
     "scrape_page": "https://www.meilleur-garagiste.com/annuaire/dumas-colinot.441830.html", 
     "business_website": null, 
     "areas_covered": null, 
-    "description": "Grand choix de pièces|DUMAS-COLINOT à Nevers Varennes-Vauzelle et Decize département de la Nièvre en région Bourgogne spécialiste de la pièce détachée automobile outillage matériel déquipement vente véhicules utilitaires|Contactez DUMAS COLINOT pour toute demande de devis Distribution de pièces automobile !", 
-    "img_link": null, 
+    "description": "Grand choix de pièces | DUMAS-COLINOT à Nevers Varennes-Vauzelle et Decize département de la Nièvre en région Bourgogne spécialiste de la pièce détachée automobile outillage matériel déquipement vente véhicules utilitaires | Contactez DUMAS COLINOT pour toute demande de devis Distribution de pièces automobile !", 
+    "img_link": [
+        "https://www.meilleur-garagiste.com/images/photo/441830/realisation68498.jpg", 
+        "https://www.meilleur-garagiste.com/images/photo/441830/realisation68499.jpg", 
+        "https://www.meilleur-garagiste.com/images/photo/441830/realisation68500.jpg"
+    ], 
     "hqdb_featured_ad_type": null, 
-    "hqdb_nr_reviews": null, 
+    "hqdb_nr_reviews": "2", 
     "hqdb_review_score": null, 
     "accreditations": null, 
     "category": null, 
