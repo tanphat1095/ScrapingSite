@@ -89,7 +89,7 @@ class Meilleurgaragistes_fr(BaseSite):
                 if i_.get('class')== 'street-address text-hide-mobile':
                     ven.street = i_.text
                     if ven.street!=None:
-                        ven.street = self.validateStreet(ven.street)
+                        ven.street = self.validateStreet(ven.street).replace('43442491700012', '')
                         if ven.street.strip()=='.':
                             ven.street= None
                 if i_.get('class')=='postal-code':
