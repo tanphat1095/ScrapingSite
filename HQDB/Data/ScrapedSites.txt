@@ -14,3 +14,4 @@ https://www.unbiased.co.uk; SiteObjects.chain_374_Unbiased_gb; Unbiased_gb
 http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm.html; SiteObjects.chain_373_Acca_gb; Acca_gb
 http://www.wiki.com; SiteObjects.getPostCodeEng; getPostCodeEng
 https://www.meilleur-garagiste.com; SiteObjects.chain_387_Meilleurgaragistes_fr; Meilleurgaragistes_fr
+http://www.drivingschoolsfinder.co.uk/; SiteObjects.chain_391_Drivingfschoolsfinder_gb; Drivingfschoolsfinder_gb

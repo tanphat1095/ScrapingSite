@@ -6,8 +6,8 @@ from lxml import etree as ET
 from SiteObjects.Objects_HQDB import Venue, Service
 import re
 import json
-import requests.packages.urllib3
-requests.packages.urllib3.disable_warnings()
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class TEMPLATE_HQDB(BaseSite):
     '''
@@ -35,17 +35,12 @@ class TEMPLATE_HQDB(BaseSite):
     
     def doWork(self):
         #Set OutFile Values
-        self.outFileVN = self.folder + '/' + self._chain_ + '_' + Validation.RevalidName(self.__name__) + '_Venues.csv'
-        self.outFileSV = self.folder + '/' + self._chain_ + '_' + Validation.RevalidName(self.__name__) + '_Services.csv'
+       
         self.phoneCodeList = Util.getPhoneCodeList()
         '''
         Code Here
         '''
         #Write Files
-        if len(venues) > 0:
-            Util.writelist2File(self.venues,self.outFileVN)
-        if len(self.services) > 0:
-            Util.writelist2File(self.services,self.outFileSV)
 
     
     def __getListVenues(self):
