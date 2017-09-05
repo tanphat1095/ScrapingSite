@@ -12,6 +12,7 @@ from SiteObjects.Objects_HQDB import Venue, Service
 import re
 import json
 import urllib3
+from operator import div
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class Drivingfschoolsfinder_gb(BaseSite):
     phoneCodeList = None
@@ -54,12 +55,15 @@ class Drivingfschoolsfinder_gb(BaseSite):
                         
                         ven =  self.__VenueParser(link,name)
                         if ven!=None:
+                            print 'Writing to Index: '+ str(index_)
                             ven.writeToFile(self.folder, index_, ven.name, False)
                             index_+=1
                 
            
     def __VenueParser(self,url__, name__):
         print 'Scraping: '+ url__
+        #url__ ='http://www.drivingschoolsfinder.co.uk/city-Aberdeen/1848237-driving-Links-Driver-Training.html'
+        #name__ ='Links Driver Training'
         city = url__.split('/')[3].replace('city-','').replace('-',' ')
         xmlDoc = Util.getRequestsXML(url__, '/html/body')
         if len(xmlDoc)<=0:
@@ -74,12 +78,27 @@ class Drivingfschoolsfinder_gb(BaseSite):
             
             td = xmlDoc.xpath('//td[@class="welcome-padding"]')
             
-            div = td[0].xpath('./div')
+            
            
+            iter__ = ''.join(td[0].itertext())
+            iter__ = iter__[iter__.find('Driving School:')+len('Driving School:'):iter__.find('[Edit Text]')].replace('\n','|').replace('\t','')
+            iter__ = iter__.replace('|||', ' | ')
+            rep = '|'+ name__
+            iter__ = iter__[0:iter__.find(rep)]
+            rep = '  |  |'
+            iter__ =iter__[0:iter__.find(rep)]
+            ven.description = iter__
+            div = td[0].xpath('./div')
+            
             if len(div)<5:
                 return None
             else:
-                info  =  div[3]
+                # div info = position div gray-line[0]+1
+                div_info = 0
+                for div_ in div:
+                    if div_.find('./script')!=None:
+                        div_info =3
+                info  =  div[div_info]
                 info_ =  ''.join(info.itertext())
                 address = info_[0:info_.find('Phone')].replace(name__,'').replace(city,'').split(',')
                 street = address[0]
@@ -90,7 +109,10 @@ class Drivingfschoolsfinder_gb(BaseSite):
                 
                 phone = info_[info_.find('Phone:')+ len('Phone:'):info_.find('Fax:')].replace(' ','')
                 if phone.isdigit():
-                    ven.phone = phone
+                    if phone.startswith('07')| phone.startswith('7'):
+                        ven.mobile_number = phone
+                    else:
+                        ven.office_number  =  phone
                 services_ = info_[info_.find('Services Offered:')+len('Services Offered:'):info_.find('Areas Served:')].strip().replace(';',',')
                 if services_ != 'None Listed - [Edit]':
                     services_ = services_.split(',')
@@ -102,7 +124,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
                 reviewer=     len(xmlDoc.xpath('//td[@class="review-box"]'))
                 if reviewer>0:
                     ven.hqdb_nr_reviews = str(reviewer)
-                scoreInfo=  div[4]
+                scoreInfo=  div[div_info+1]
                 #http://www.drivingschoolsfinder.co.uk/halfstar.gif +0.5
                 #http://www.drivingschoolsfinder.co.uk/fullstar.gif +1
                 #http://www.drivingschoolsfinder.co.uk/emptystar.gif +0
@@ -119,14 +141,48 @@ class Drivingfschoolsfinder_gb(BaseSite):
                         score__ +=1
                     if score_== 'http://www.drivingschoolsfinder.co.uk/emptystar.gif':
                         score__ +=0
-                ven.hqdb_review_score = str(score__).replace('.0', '')
-                if score__ >0:
-                    print ''
-                print ''
-            
+                if score__ >0:       
+                        ven.hqdb_review_score = str(score__).replace('.0', '')
+                ven.country = 'gb'
+                emails_ = re.findall(r'[\w\.-]+@[\w\.-]+', info_)
+                for email_ in emails_:
+                    ven.business_email = email_
+            #    website_ = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', info_)
+            #    for web_  in website_:
+                #       ven.business_website = web_ 
+                if ven.business_email!=None:
+                    if ven.business_email.startswith('http'):
+                        ven.business_email= None
+                    ven.business_email = None
+                if info_.find('No Website') ==-1:
+                    arrays__ =    info_.split(' ')
+                    for i in range(0, len(arrays__)):
+                        if arrays__[i].find('Website')>=0:
+                            web_ = arrays__[i+1].replace('\t',' ').replace('\n',' ').split()[0].replace('No','')
+                            ven.business_website = self.formatWeb_(web_)
+                            print ven.business_website
+                            break
+                            
+                        
+                    
+                address_ = ven.street+', '+ ven.city+', '+ ven.zipcode
+                ven.pricelist_link = [ven.scrape_page]
+                (ven.latitude,ven.longitude) = self.getLatlng(address_, 'UK')
             return ven
     def __ServicesParser(self,url,xmlServices):        
             ''
+    def formatWeb_(self,link_):
+        if link_.startswith('http') | link_.startswith('https'):
+            ''
+        else:
+            link_ = 'http://'+link_
+        link__ = link_.split('//')[1]
+        if link__.startswith('www'):
+            ''
+        else:
+            link__ = 'www.'+ link__
+            link_ = 'http://'+ link__
+        return link_
     def __list_city(self):
         xmlDoc = Util.getRequestsXML(self._url_lstVenues, '//td[@class="welcome-padding"]')
         #print ET.dump(xmlDoc)
@@ -137,3 +193,22 @@ class Drivingfschoolsfinder_gb(BaseSite):
                 existing=[x for x in self.__city__ if link in x]
                 if len(existing)<=0:
                     self.__city__.append(link)
+    def getLatlng(self,address,countr):
+        try:
+            jsonLatlng = Util.getGEOCode(address, countr)
+            if jsonLatlng !=None:
+                if jsonLatlng.get('status') =='OK':
+                    result =  jsonLatlng.get('results')
+                    for re in result:
+                        if re.get('geometry')!=None:
+                            geometry = re.get('geometry')
+                            location = geometry.get('location')
+                            lat = location.get('lat')
+                            lng = location.get('lng')
+                            return(str(lat),str(lng))
+                else:
+                    return (None,None)
+            else:
+                return (None,None)
+        except Exception,ex:
+            return (None,None)
