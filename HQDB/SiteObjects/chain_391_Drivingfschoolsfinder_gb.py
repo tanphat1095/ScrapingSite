@@ -1,8 +1,3 @@
-'''
-Created on 1 thg 9, 2017
-
-@author: phat.le
-'''
 #coding: utf-8
 from __future__ import unicode_literals
 from BaseSite import BaseSite
@@ -28,6 +23,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
     venues = []
     outFileVN = ''
     outFileSV = ''
+    removeChar= ['1 and 2 Hour','hour & haft and two hour lessons .','10% discount when paying for 10 lessons','1 and 2 hour','1 or 2 hour lessons','One Hour','2hrs','5 hours','1hr30 min','2hr','3 HOURS','6 hours','From','per hour','ONE HOUR','per one hour','First hour','first 5 hours','First 5 hours','(subject to terms and conditions 1x2x2 hours)','one hour','60 minute','one or two hour','1hr','1.5hr','1 hour']
     __city__ = []
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
@@ -35,6 +31,12 @@ class Drivingfschoolsfinder_gb(BaseSite):
         self._isWriteList = isWriteList
     def doWork(self):
         #Set OutFile Values
+        
+        #string__ = 'SPECIAL OFFER FIRST 3 HOURS £30 Single lessons'
+        #string__ =  self.validateServices(string__) 
+        
+        
+        
         self.phoneCodeList = Util.getPhoneCodeList()
         self.__list_city()
         print 'Total city: '+ str(len(self.__city__))
@@ -62,11 +64,11 @@ class Drivingfschoolsfinder_gb(BaseSite):
            
     def __VenueParser(self,url__, name__):
         print 'Scraping: '+ url__
-        #url__ ='http://www.drivingschoolsfinder.co.uk/city-Aberdeen/1848237-driving-Links-Driver-Training.html'
-        #name__ ='Links Driver Training'
+        #url__ ='http://www.drivingschoolsfinder.co.uk/city-Birmingham/1850890-driving--Bill-Plant.html'
+        #name__ ='Bill Plant'
         city = url__.split('/')[3].replace('city-','').replace('-',' ')
         xmlDoc = Util.getRequestsXML(url__, '/html/body')
-        if len(xmlDoc)<=0:
+        if xmlDoc ==None :
             return None
         else:
             ven =  Venue()
@@ -74,12 +76,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
             ven.name = name__
             ven.city = city
             ven.scrape_page = url__
-            
-            
             td = xmlDoc.xpath('//td[@class="welcome-padding"]')
-            
-            
-           
             iter__ = ''.join(td[0].itertext())
             iter__ = iter__[iter__.find('Driving School:')+len('Driving School:'):iter__.find('[Edit Text]')].replace('\n','|').replace('\t','')
             iter__ = iter__.replace('|||', ' | ')
@@ -100,26 +97,46 @@ class Drivingfschoolsfinder_gb(BaseSite):
                         div_info =3
                 info  =  div[div_info]
                 info_ =  ''.join(info.itertext())
-                address = info_[0:info_.find('Phone')].replace(name__,'').replace(city,'').split(',')
-                street = address[0]
-                zipcode = address[1]
-                
-                ven.street = street
+                address = info_[0:info_.find('Phone')].replace(name__,'').replace(city,','+city).replace(',,',',').replace(', ,',',').split(',')
+                #street = ', '.join(address[0:len(address)-2]).replace(','+city,'')
+                street = ', '.join(address[0:len(address)])
+                street = street[0:street.find(city)-1]
+                if street.endswith(','):
+                    street = street[0:len(street)-1]
+                zipcode = address[len(address)-1]
+                street__ = street.upper()
+                if street__.find('PO BOX')==-1:
+                    ven.street = street
                 ven.zipcode=  zipcode
                 
                 phone = info_[info_.find('Phone:')+ len('Phone:'):info_.find('Fax:')].replace(' ','')
                 if phone.isdigit():
                     if phone.startswith('07')| phone.startswith('7'):
-                        ven.mobile_number = phone
+                        ven.mobile_number = self.validatePhone(phone)
                     else:
-                        ven.office_number  =  phone
+                        ven.office_number = self.validatePhone(phone)
                 services_ = info_[info_.find('Services Offered:')+len('Services Offered:'):info_.find('Areas Served:')].strip().replace(';',',')
                 if services_ != 'None Listed - [Edit]':
-                    services_ = services_.split(',')
+                    services_ = services_.replace('/', ',').replace(',,', ',').split(',')
                     for s in services_:
-                        ser = Service()
-                        ser.service = s.strip()
-                        sers.append(ser)
+                        name = self.validateServices(s)
+                        if len(name.split())>=2:
+                            services = Service()
+                            services.service = name
+                            sers.append(services)
+                        
+                        
+                        
+                    
+                    #ven.description = ven.description +' | ' +services_
+                stringfind = 'No Website'
+                if info_.find('No Website')==-1:
+                    stringfind ='Website'
+                area_coverd = info_[info_.find('Areas Served:')+len('Areas Served:'):info_.find(stringfind)].strip().replace(';',',')
+                #area_coverd = area_coverd[0:area_coverd.find(stringfind)]
+                if area_coverd!= 'None Listed - [Edit]':
+                    ven.areas_covered = area_coverd
+                    
                 ven.services = sers
                 reviewer=     len(xmlDoc.xpath('//td[@class="review-box"]'))
                 if reviewer>0:
@@ -163,11 +180,13 @@ class Drivingfschoolsfinder_gb(BaseSite):
                             print ven.business_website
                             break
                             
-                        
-                    
-                address_ = ven.street+', '+ ven.city+', '+ ven.zipcode
+                if ven.street ==None:
+                    address_ =ven.city+', '+ ven.zipcode
+                    #ven.formatted_address = ven.city+', '+ven.zipcode
+                else:
+                    address_ = ven.street+', '+ven.city+', '+ ven.zipcode
                 ven.pricelist_link = [ven.scrape_page]
-                (ven.latitude,ven.longitude) = self.getLatlng(address_, 'UK')
+                #(ven.latitude,ven.longitude) = self.getLatlng(address_, 'UK')
             return ven
     def __ServicesParser(self,url,xmlServices):        
             ''
@@ -212,3 +231,39 @@ class Drivingfschoolsfinder_gb(BaseSite):
                 return (None,None)
         except Exception,ex:
             return (None,None)
+    
+    def validateServices(self,name__):
+            for char  in self.removeChar:
+                name__ =   name__.replace(char,'')
+            arr =  name__.split()
+            for ar in range(0,len(arr)):
+                if arr[ar].find('£')>=0:
+                    arr[ar] =''
+            return ' '.join(arr)
+                
+    
+    
+    
+    
+    def validatePhone(self,phone):
+        if phone.isdigit():
+            if phone.startswith('0800') | phone.startswith('800') :
+                return None
+            if phone.startswith('44') and len(phone) == 12:
+                return '+'+ phone
+            if phone.startswith('+44') and len(phone)==13:
+                return phone
+            if phone.startswith('0') and len(phone) ==11:
+                return phone
+            else:
+                if phone.startswith('44'):
+                    return None
+                if phone.startswith('+44'):
+                    return None
+                if phone.startswith('0'):
+                    return None
+                else:
+                    return phone
+        else:
+            phone = None
+        return phone

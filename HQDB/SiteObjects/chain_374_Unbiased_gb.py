@@ -13,7 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from time import sleep
 #from pyvirtualdisplay import Display
 requests.packages.urllib3.disable_warnings()
@@ -90,6 +89,8 @@ class Unbiased_gb(BaseSite):
                     url_hash = self.getUrlSelenium(url_find,timeSleep)
                     if timeSleep>=20:
                         break
+                if url_hash ==None:
+                    continue
                 arraysHash = url_hash.split('#/')
                 while len(arraysHash)<2:
                     timeSleep+=1
@@ -135,6 +136,7 @@ class Unbiased_gb(BaseSite):
          print 'Scrapping: '+url    
          ven = Venue()
          services_v =[]
+         ven.category =  jsonItems.get('restriction').get('name')
          ven.adid = str(jsonItems.get('id'))
          ven.name = jsonItems.get('companyName')
          ven.latitude = jsonItems.get('coordinates').get('lat')
@@ -154,7 +156,7 @@ class Unbiased_gb(BaseSite):
          xmlRequest = Util.getRequestsXML(url,'//div[@class="container-fluid"]')
          if xmlRequest !=None:
             stringAddress = xmlRequest.find('.//span[@class="profile-meta__address"]').text.replace(',,',',')
-            ven.formatted_address = stringAddress
+            ven.formatted_address = stringAddress.replace(ven.name+',','')
             #ven.street = stringAddress.split(',')[0]
             #ven.areas_covered = ', '.join(stringAddress.split(',')[-2:])
             #ven.zipcode = ven.areas_covered.split(',')[1]
@@ -165,7 +167,7 @@ class Unbiased_gb(BaseSite):
                 for phone_ in phoneLabel:
                     phone= phone_.get('data-phone').replace('\n','').replace(' ','')
                     if phone.find('Shownumber')<=0:
-                        phone = self.checkPhone(phone)
+                        phone = self.validatePhone(phone)
                         if phone!=None:
                             if phone.startswith('07'):
                                 ven.mobile_number = phone
@@ -178,7 +180,7 @@ class Unbiased_gb(BaseSite):
                 for ser_name  in list_ser:
                     services_ = Service()
                     services_.service = ser_name.text
-                    services_.scrape_page = ven.scrape_page
+                    #services_.scrape_page = ven.scrape_page
                     services_v.append(services_)
                     #self.services.append(services_.toOrderDict())
             ven.services = services_v
@@ -221,6 +223,28 @@ class Unbiased_gb(BaseSite):
         }
         response = requests.request("GET", url, headers=headers,timeout=(60,60),verify=False)
         return response.content
+    def validatePhone(self,phone):
+        if phone.isdigit():
+            if phone.startswith('0800') | phone.startswith('800') :
+                return None
+            if phone.startswith('44') and len(phone) == 12:
+                return '+'+ phone
+            if phone.startswith('+44') and len(phone)==13:
+                return phone
+            if phone.startswith('0') and len(phone) ==11:
+                return phone
+            else:
+                if phone.startswith('44'):
+                    return None
+                if phone.startswith('+44'):
+                    return None
+                if phone.startswith('0'):
+                    return None
+                else:
+                    return phone.replace('01615069963','')
+        else:
+            phone = None
+        return phone
     def checkPhone(self, phone):
         _phone =''
         try:

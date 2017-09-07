@@ -15,3 +15,4 @@ http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm.html; SiteOb
 http://www.wiki.com; SiteObjects.getPostCodeEng; getPostCodeEng
 https://www.meilleur-garagiste.com; SiteObjects.chain_387_Meilleurgaragistes_fr; Meilleurgaragistes_fr
 http://www.drivingschoolsfinder.co.uk/; SiteObjects.chain_391_Drivingfschoolsfinder_gb; Drivingfschoolsfinder_gb
+http://www.architecturalindex.com/; SiteObjects.chain_399_Architecturalindex_gb; Architecturalindex_gb
