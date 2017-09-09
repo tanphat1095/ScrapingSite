@@ -153,6 +153,7 @@ class Unbiased_gb(BaseSite):
          ven.scrape_page = url
          ven.pricelist_link = [url]
          self.list_url.append(url__)
+         #url ='https://www.unbiased.co.uk/profile/financial-adviser/fairstone-financial-management-ltd-516727?hash=8628266'
          xmlRequest = Util.getRequestsXML(url,'//div[@class="container-fluid"]')
          if xmlRequest !=None:
             stringAddress = xmlRequest.find('.//span[@class="profile-meta__address"]').text.replace(',,',',')
@@ -168,6 +169,8 @@ class Unbiased_gb(BaseSite):
                     phone= phone_.get('data-phone').replace('\n','').replace(' ','')
                     if phone.find('Shownumber')<=0:
                         phone = self.validatePhone(phone)
+                        if phone =='01615069963':
+                            phone = None
                         if phone!=None:
                             if phone.startswith('07'):
                                 ven.mobile_number = phone
@@ -241,7 +244,7 @@ class Unbiased_gb(BaseSite):
                 if phone.startswith('0'):
                     return None
                 else:
-                    return phone.replace('01615069963','')
+                    return phone
         else:
             phone = None
         return phone

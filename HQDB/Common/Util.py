@@ -37,9 +37,9 @@ _24H_ES_DaysOfWeek = "Lunes-Domingo: 00:00-24:00"
 
 _24H_PL_DaysOfWeek = "Poniedziałek-Niedziela: 00:00-24:00"
 _24H_CZ_DaysOfWeek = "Pondĕlí-Nedĕle: 00:00-24:00"
-#geocodeAPI_key = "AIzaSyDVUXo2fMFQzeg0OkIAXjcq5k4sy4x-yMU"
+geocodeAPI_key = "AIzaSyDVUXo2fMFQzeg0OkIAXjcq5k4sy4x-yMU"
 #geocodeAPI_key = "AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s"
-geocodeAPI_key = "AIzaSyCAfw9oD58hpN3SwG3tGannKhgIcOFnzbA"
+#geocodeAPI_key = "AIzaSyCAfw9oD58hpN3SwG3tGannKhgIcOFnzbA"
 
 
 
