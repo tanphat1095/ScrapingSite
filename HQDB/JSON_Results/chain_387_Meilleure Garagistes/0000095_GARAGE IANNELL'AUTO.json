@@ -22,7 +22,7 @@
     "zipcode": "42340", 
     "formatted_address": "7 bis rue Gutenberg, VEAUCHE, 42340", 
     "country": "fr", 
-    "office_number": "0477611345", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

@@ -40,8 +40,13 @@ _24H_CZ_DaysOfWeek = "Pondĕlí-Nedĕle: 00:00-24:00"
 geocodeAPI_key = "AIzaSyDVUXo2fMFQzeg0OkIAXjcq5k4sy4x-yMU"
 #geocodeAPI_key = "AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s"
 #geocodeAPI_key = "AIzaSyCAfw9oD58hpN3SwG3tGannKhgIcOFnzbA"
-
-
+list_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
+            'AIzaSyC6xwNdTRA593eUQ58s1WiSrFuJqj5_58Y',
+            'AIzaSyDE3_5U8G-Mxe2VVhBuKYnW-XoKM21z54A',
+            'AIzaSyCqsFHXIZ5okyk7wgZkk09zTABy0mt0qMg',
+            'AIzaSyBgOFAVElGalbpf8E77qFu4F4_1UAQgjG4',
+            'AIzaSyBVcJQvNneYV5ElRYQ7Rt2nKHXVXDNCYbM',
+            'AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s']
 
 def GetYQLResponse(select, url, xpath, spec=False):
     '''
@@ -282,6 +287,55 @@ def getGEOCode(fulladdress,country):
     except Exception,ex:
         return None
 
+def getGeoCode___(fulladdress,country,key):
+    try:
+        print list_key[key]
+        url = "https://maps.googleapis.com/maps/api/geocode/json"
+        querystring = {
+                "address":fulladdress + "," + country,
+                "key":list_key[key]
+                
+            }
+        headers = {
+                'content-type': "application/x-www-form-urlencoded"
+            }
+        response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
+        #other way
+        #
+        json_location = response.json()
+        return json_location     
+    except Exception,ex:
+            return None
+        
+def autoChange(fulladdress,country):
+    key =0
+    result = getGeoCode___(fulladdress, country, key)
+    if result ==None:
+        return None
+    else:
+        if result.get('status')=='OK':
+            return result
+        else:
+            while result.get('status')!='OK':
+                key+=1
+                if key <= (len(list_key)-1):
+                    result = getGeoCode___(fulladdress, country, key)
+                    if result.get('status')=='OK':
+                        return result
+                else:
+                    return None
+def checkAPI():
+    for key in range(0, len(list_key)):
+        temp ='10 Halfway Avenue, LUTON, LU48RB'
+        result = getGeoCode___(temp, 'UK', key)
+        if result !=None:
+            if result.get('status')=='OK':
+                print 'OK'
+            else:
+                print 'NOT OK'
+        else:
+            print '*'*5
+        
 def subtractTime(t1,t2):        
         # caveat emptor - assumes t1 & t2 are python times, on the same day and
         # t2 is after t1

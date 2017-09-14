@@ -20,7 +20,7 @@
     "zipcode": "44810", 
     "formatted_address": "10 place de la république, HERIC, 44810", 
     "country": "fr", 
-    "office_number": "0240576010", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

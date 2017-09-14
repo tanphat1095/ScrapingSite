@@ -18,7 +18,7 @@
     "zipcode": "19200", 
     "formatted_address": "56 Avenue du Général Leclerc, USSEL, 19200", 
     "country": "fr", 
-    "office_number": "0555962323", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

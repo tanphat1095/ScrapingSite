@@ -20,7 +20,7 @@
     "zipcode": "30100", 
     "formatted_address": "6 av Général de Larminat, ALES, 30100", 
     "country": "fr", 
-    "office_number": "0466303916", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

@@ -20,7 +20,7 @@
     "zipcode": "38140", 
     "formatted_address": "110 route de Lyon, APPRIEU, 38140", 
     "country": "fr", 
-    "office_number": "0476937190", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

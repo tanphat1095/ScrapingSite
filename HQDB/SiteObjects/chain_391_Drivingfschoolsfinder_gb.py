@@ -64,8 +64,8 @@ class Drivingfschoolsfinder_gb(BaseSite):
            
     def __VenueParser(self,url__, name__):
         print 'Scraping: '+ url__
-        #url__ ='http://www.drivingschoolsfinder.co.uk/city-Birmingham/1850890-driving--Bill-Plant.html'
-        #name__ ='Bill Plant'
+        #url__ ='http://www.drivingschoolsfinder.co.uk/city-Accrington/1846198-driving-Terrys-School-of-Motoring.html'
+        #name__ ='Terrys School of Motoring'
         city = url__.split('/')[3].replace('city-','').replace('-',' ')
         xmlDoc = Util.getRequestsXML(url__, '/html/body')
         if xmlDoc ==None :
@@ -120,7 +120,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
                     services_ = services_.replace('/', ',').replace(',,', ',').split(',')
                     for s in services_:
                         name = self.validateServices(s)
-                        if len(name.split())>=2:
+                        if len(name)>=2:
                             services = Service()
                             services.service = name
                             sers.append(services)
@@ -186,7 +186,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
                 else:
                     address_ = ven.street+', '+ven.city+', '+ ven.zipcode
                 ven.pricelist_link = [ven.scrape_page]
-                #(ven.latitude,ven.longitude) = self.getLatlng(address_, 'UK')
+                (ven.latitude,ven.longitude) = self.getLatlng(address_, 'UK')
             return ven
     def __ServicesParser(self,url,xmlServices):        
             ''
@@ -214,7 +214,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
                     self.__city__.append(link)
     def getLatlng(self,address,countr):
         try:
-            jsonLatlng = Util.getGEOCode(address, countr)
+            jsonLatlng = Util.autoChange(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')

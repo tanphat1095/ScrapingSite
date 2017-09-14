@@ -151,13 +151,21 @@ class Unbiased_gb(BaseSite):
          ven.description = jsonItems.get('salesPitch')
          ven.country ='gb'
          ven.scrape_page = url
-         ven.pricelist_link = [url]
+         #ven.pricelist_link = [url]
          self.list_url.append(url__)
-         #url ='https://www.unbiased.co.uk/profile/financial-adviser/fairstone-financial-management-ltd-516727?hash=8628266'
+         url ='https://www.unbiased.co.uk/profile/financial-adviser/stiles-company-financial-services-petersfield-ltd-511274'
          xmlRequest = Util.getRequestsXML(url,'//div[@class="container-fluid"]')
          if xmlRequest !=None:
             stringAddress = xmlRequest.find('.//span[@class="profile-meta__address"]').text.replace(',,',',')
-            ven.formatted_address = stringAddress.replace(ven.name+',','')
+            
+            ven.name =' Stiles & Company Financial Services (Petersfield) Ltd '
+            
+            #ven.formatted_address = stringAddress.replace(ven.name.strip(),'')
+            ven.formatted_address = self.removeNameFromAdd(ven.name.strip(), stringAddress)
+            
+            
+            
+            
             #ven.street = stringAddress.split(',')[0]
             #ven.areas_covered = ', '.join(stringAddress.split(',')[-2:])
             #ven.zipcode = ven.areas_covered.split(',')[1]
@@ -259,3 +267,29 @@ class Unbiased_gb(BaseSite):
             _phone = None
         print _phone
         return _phone
+    def removeNameFromAdd(self,name, address__):
+        if name !=None and address__!=None:
+            count =0
+            nameArr = name.split()
+            addressArr = address__.split(',')
+            addressArr = addressArr[0].split()
+            for na in nameArr:
+                for ad in addressArr:
+                    if na == ad:
+                        count+=1
+            if count >= len(nameArr)-2:
+                add_ = address__.split(',')
+                return ','.join(add_[1:len(add_)])
+            else:
+                return address__
+        else:
+            return address__
+            
+            
+            
+            
+            
+            
+            
+            
+            

@@ -20,7 +20,7 @@
     "zipcode": "42110", 
     "formatted_address": "15 rue René Cassin, FEURS, 42110", 
     "country": "fr", 
-    "office_number": "0967180711", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

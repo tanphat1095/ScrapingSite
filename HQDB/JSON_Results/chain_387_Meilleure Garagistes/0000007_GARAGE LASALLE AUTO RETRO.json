@@ -20,7 +20,7 @@
     "zipcode": "30460", 
     "formatted_address": "20, rue de la Baraque, LASALLE, 30460", 
     "country": "fr", 
-    "office_number": "0466256840", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

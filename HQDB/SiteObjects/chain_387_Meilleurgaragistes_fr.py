@@ -30,6 +30,9 @@ class Meilleurgaragistes_fr(BaseSite):
     venues = []
     outFileVN = ''
     outFileSV = ''
+    link_venues = []
+    phoneRemove =['08714856510','055094212','0549569']
+    regex_= ['(BP[\s][\d]{5})','(BP[\d]{5})','(CS[\s][\d]{5})','(CS[\d]{5})','([\d]{4,5})']
     
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
@@ -43,6 +46,8 @@ class Meilleurgaragistes_fr(BaseSite):
         Code Here
         '''
         #Write Files
+        
+        
         self.phoneCodeList = Util.getPhoneCodeList()
         self.__getListVenues()
         
@@ -65,6 +70,7 @@ class Meilleurgaragistes_fr(BaseSite):
                         print 'Writing files: '+ str(index_)
                         ven.writeToFile(self.folder, index_, ven.name, False)
                         print str(len(self.services))+ ' services'
+                       
                         index_+=1
                     
             else:
@@ -74,6 +80,13 @@ class Meilleurgaragistes_fr(BaseSite):
 
     def __VenueParser(self, link):        
         print 'Scrapping: ' + link
+        
+        existing=[x for x in self.link_venues if link in x]
+        if len(existing)>0:
+            print 'Len existing : '+ str(len(existing))
+            return None
+        
+        
         xmlBody = Util.getRequestsXML(link,'//div[@id="fiche-artisan"]')
         if xmlBody !=None and len(xmlBody)>0:
             ven = Venue()
@@ -81,7 +94,7 @@ class Meilleurgaragistes_fr(BaseSite):
             if name_ !=None :
                 name_ = name_.text
                 ven.name = name_
-            xmldiv = xmlBody.find('.//div[@class="row nomargin valign-wrapper"]/div')
+            xmldiv = xmlBody.find('.//div[@class="row nomargin"]/div')
             if xmldiv ==None: 
                 return None
             span_ = xmldiv.xpath('./span')
@@ -89,24 +102,26 @@ class Meilleurgaragistes_fr(BaseSite):
                 if i_.get('class')== 'street-address text-hide-mobile':
                     ven.street = i_.text
                     if ven.street!=None:
-                        ven.street = self.validateStreet(ven.street).replace('43442491700012', '')
+                        #ven.street = self.validateStreet(ven.street).replace('43442491700012', '')
+                        ven.street = self.validateStreet2(ven.street).replace('43442491700012', '')
                         if ven.street.strip()=='.':
                             ven.street= None
                 if i_.get('class')=='postal-code':
                     ven.zipcode = i_.text
+                    ven.zipcode = self.validateZipcode(ven.zipcode)
                     if ven.zipcode !=None  and len(ven.zipcode)>0 and ven.zipcode.isdigit() :
                         zip_ = int(ven.zipcode)
                         if zip_ <1000 | zip_>95978:
-                            return None
+                            ven.zipcode = None
                 if i_.get('class')=='locality':
                     ven.city = i_.text
             a = xmlBody.find('.//a[@class="col m12 s4 tel waves-effect waves-light btn center btn-fix bleu"]')
             if a!=None:
                 phone = a.get('href').replace('tel:','').replace(' ','')
                 if phone.startswith('07') | phone.startswith('06'):
-                    ven.mobile_number = phone
+                    ven.mobile_number = self.validatePhone(phone)
                 else:
-                    ven.office_number =  phone
+                    ven.office_number =  self.validatePhone(phone)
             logo =  xmlBody.find('.//div[@class="center-align"]/img')
             if logo!=None:
                 ven.venue_images = self.__url__+ logo.get('src')
@@ -120,14 +135,17 @@ class Meilleurgaragistes_fr(BaseSite):
                 sers.append(servic)
                 self.services.append(servic)
             ven.services = sers
-            if ven.street !=None and len(ven.street)>0:
-                add_= ven.street+', '+ ven.city+', '+ ven.zipcode
+            
+            if ven.city!=None and ven.zipcode !=None:
+                if ven.street !=None and len(ven.street)>0:
+                    add_= ven.street+', '+ ven.city+', '+ ven.zipcode
+                else:
+                    add_ = ven.city+', '+ven.zipcode
             else:
-                add_ = ven.city+', '+ven.zipcode
-                    
+                add_ = None      
             (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
             
-            
+            self.link_venues.append(link)
             ven.country='fr'
             desc = xmlBody.find('.//p[@id="description"]')
             desc_ =''
@@ -166,7 +184,7 @@ class Meilleurgaragistes_fr(BaseSite):
         return xml
     def getLatlng(self,address,countr):
         try:
-            jsonLatlng = Util.getGEOCode(address, countr)
+            jsonLatlng = Util.autoChange(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')
@@ -205,3 +223,36 @@ class Meilleurgaragistes_fr(BaseSite):
                 return String_
         else:
             return String_
+        
+    def validateStreet2(self, street):
+        for reg in self.regex_:
+            results = re.search(reg, street, flags=0)
+            if results!=None:
+                street = street.replace(results.group(1),'')
+        return street
+    def validatePhone(self,phone):
+        if phone ==None:
+            return None
+        for re in self.phoneRemove:
+            phone.replace(re,'')
+        if phone.isdigit():
+            if phone.startswith('0'):
+                if len(phone)>=11:
+                    return phone
+                else:
+                    return None
+            else:
+                if len(phone)>=10:
+                    return phone
+                else:
+                    return None
+        else:
+            return None
+        
+    def validateZipcode(self,zipcode):
+        if zipcode.isdigit() and len(zipcode) ==5:
+            return zipcode
+        else:
+            None   
+                
+            

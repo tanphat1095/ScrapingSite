@@ -20,7 +20,7 @@
     "zipcode": "42100", 
     "formatted_address": "3-5 Avenue de Rochetaillée, ST ETIENNE, 42100", 
     "country": "fr", 
-    "office_number": "0477809831", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

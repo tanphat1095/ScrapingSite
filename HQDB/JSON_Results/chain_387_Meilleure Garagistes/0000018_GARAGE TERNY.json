@@ -20,7 +20,7 @@
     "zipcode": "02400", 
     "formatted_address": "3 rue de la Banque, CHATEAU THIERRY, 02400", 
     "country": "fr", 
-    "office_number": "0323832445", 
+    "office_number": null, 
     "office_number2": null, 
     "mobile_number": null, 
     "mobile_number2": null, 

@@ -193,12 +193,13 @@ class Acca_gb(BaseSite):
         aTag = locate.find('./h5/a')
         link =  aTag.get('href')
         
-       
+        findCity  = locate.find('./div')
+        
         ven.business_email=''
        
         ven.name = aTag.text.replace('/','-')
         ven.scrape_page =self.__url__+  link
-        ven.pricelist_link = [self.__url__+link]
+        #ven.pricelist_link = [self.__url__+link]
         address = ' '.join(locate.itertext()).replace('\t','')
         address_ = address.split('\n')
         lensAdd = len(address_)
@@ -206,8 +207,17 @@ class Acca_gb(BaseSite):
         info = address_[lensAdd-3].split(',')
         info = info[len(info)-1]
         info = info.split()
-        city = info[len(info)-1]
-        street= ' '.join(info[0:len(info)-1]).replace('PO BOX 16988','')
+        if findCity!=None:
+            city = findCity.text
+            address2= address.replace('\n', '').replace(ven.name.strip(), '')
+            street = address2[0:address2.find(city)]
+            
+        else:
+            city = info[len(info)-1]
+            street= ' '.join(info[0:len(info)-1]).replace(ven.name.strip(), '').replace('PO BOX 16988','')
+        
+        if street.upper().find('PO BOX')>=0:
+            street = None
         if ven.scrape_page=='http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm/results/details.html?isocountry=VN&location=&country=UK&firmname=a&organisationid=ACCA&hid=&pagenumber=5&resultsperpage=25&requestcount=2&advisorid=3446358':
             print ''
         city = city.upper()
@@ -310,7 +320,7 @@ class Acca_gb(BaseSite):
         return currentUrl
     def getLatlng(self,address,countr):
         try:
-            jsonLatlng = Util.getGEOCode(address, countr)
+            jsonLatlng = Util.autoChange(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')
