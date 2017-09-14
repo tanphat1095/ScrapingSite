@@ -34,23 +34,14 @@ class TEMPLATE_HQDB(BaseSite):
     
     
     def doWork(self):
-        #Set OutFile Values
-       
         self.phoneCodeList = Util.getPhoneCodeList()
-        '''
-        Code Here
-        '''
-        #Write Files
 
-    
     def __getListVenues(self):
-        print "Getting list of Venues"
+        ''
         
 
     def __VenueParser(self):        
-        print 'Scrapping: '
-        ven = Venue()
-        return ven
+        ''
 
     def __ServicesParser(self,url,xmlServices):        
         ''

@@ -24,14 +24,15 @@ def main():
     #working.do(["", "url=http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm.html"]) #373
     #working.do(["", "url=https://www.meilleur-garagiste.com"]) #387
     #working.do(["", "url=http://www.drivingschoolsfinder.co.uk/"]) # 391
-    working.do(["", "url=http://www.architecturalindex.com/"]) #399
+    #working.do(["", "url=http://www.architecturalindex.com/"]) #399
     #working.do(["", "url=http://www.homewise.ie"]) #403
-   
+    working.do(["", "url=https://www.blauarbeit.de"]) #406
     print "DONE"
     
 if __name__ == '__main__':
-    main()
     #Util.checkAPI()
+    main()
+    
     
     
     #string_ = 'The Guildhall, Street-an-Pol, St Ives, Cornwall, Tr138xq'
