@@ -327,6 +327,7 @@ def autoChange(fulladdress,country):
 def checkAPI():
     for key in range(0, len(list_key)):
         temp ='10 Halfway Avenue, LUTON, LU48RB'
+        #temp ='LU48RB'
         result = getGeoCode___(temp, 'UK', key)
         if result !=None:
             if result.get('status')=='OK':

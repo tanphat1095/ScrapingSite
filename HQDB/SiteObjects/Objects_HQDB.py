@@ -292,7 +292,6 @@ class Venue(object):
                              ('facebook',self.facebook),
                              ('twitter',self.twitter),
                              ('instagram',self.instagram),
-                             ('venue_images',self.venue_images),
                              ('opening_hours_raw',self.opening_hours_raw),
                              ('pricelist_link',self.pricelist_link),
                              ('services',services_tmp)])
