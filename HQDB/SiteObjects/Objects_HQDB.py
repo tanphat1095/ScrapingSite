@@ -188,10 +188,10 @@ class Venue(object):
             Util.log.invalid(self.venue_images,"Invalid URL" + self.venue_images)
         elif self.venue_images != None:
             self.venue_images = Validator.RevalidURL(self.venue_images)
-        if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude) == False:            
-            Util.log.invalid('GEO code',self.scrape_page + ': invalid GEO code (' + self.latitude + ',' + self.longitude + ')')
-            self.latitude = None
-            self.longitude = None
+        #if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude) == False:            
+        #    Util.log.invalid('GEO code',self.scrape_page + ': invalid GEO code (' + self.latitude + ',' + self.longitude + ')')
+        #    self.latitude = None
+        #    self.longitude = None
         self.opening_hours_raw = Validator.ReValidString(self.opening_hours_raw)
 
     

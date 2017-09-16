@@ -29,6 +29,7 @@ class Blaurabeit_de(BaseSite):
     venues = []
     outFileVN = ''
     outFileSV = ''
+    removeName =[':)',':','=))','=']
     removeDes= ['Mobil','Email','Tel:']
     bpfArray =['//div[@class="row row_b row_container clearfix"]',
                '//div[@class="row row_f row_container clearfix"]',
@@ -66,12 +67,13 @@ class Blaurabeit_de(BaseSite):
                             if len(xmlDoc.xpath('./div[@class="br_results br_results_dir"]'))<=0:
                                 break
                             for xpath_ in self.bpfArray:
-                                if xpath_ =='//div[@class="row row_b row_container clearfix"]':
-                                    hqdb_type = None
-                                else:
-                                    hqdb_type = 'featured'
                                 elementIems = xmlDoc.xpath(xpath_)
                                 for ele in elementIems:
+                                    type_hqdb = ele.find('.//div[@class="col-inner"]/div')
+                                    if xpath_ =='//div[@class="row row_b row_container clearfix"]':
+                                        hqdb_type =None
+                                    else:
+                                        hqdb_type =  ''.join(type_hqdb.itertext()).strip()
                                     linkItems = ele.find('.//div[@class="name"]//a').get('href')
                                     if linkItems.startswith('/'):
                                         linkItems= self.__url__+linkItems
@@ -79,13 +81,13 @@ class Blaurabeit_de(BaseSite):
                                         ven =    self.__VenueParser(hqdb_type, linkItems,catename,cate)
                                         if ven!=None:
                                             print 'Writing index: '+str(index)
-                                            ven.writeToFile(self.folder, index, ven.name, False)
+                                            ven.writeToFile(self.folder, index, self.validateFilename(ven.name), False)
                                             index+=1
                                             
                                 
                             pages+=1
     def __VenueParser(self,hqdb_type, linkItems,subcate,cate):    
-            linkItems ='https://www.blauarbeit.de/p/babysitter-harsum/sarachen/254705.htm'    
+            #linkItems ='https://www.blauarbeit.de/p/babysitter-berlin/belumah/207707.htm'    
             xmlPages = self.getRequest(linkItems)
             #print ET.dump(xmlPages)
             #time.sleep(1)
@@ -130,6 +132,7 @@ class Blaurabeit_de(BaseSite):
                         if key_ =='Addresse:':
                             address_ =  values_
                             (ven.street,ven.city,ven.zipcode) = self.processAddress(address_)
+                            
                         if key_ =='Homepage:':
                             a_ = td[1].find('./a')
                             if a_ !=None:
@@ -162,9 +165,17 @@ class Blaurabeit_de(BaseSite):
                         zipcode_ = ven.zipcode
                     if ven.street !=None and len(ven.street)>=3:
                         street_ = ven.street
-                    add__ = street_+', '+city_+', '+zipcode_
                     
-                    #(ven.latitude,ven.longitude)  = self.getLatlng(add__,'DE') #script_
+                        
+                    add__ = (street_+', '+city_+', '+zipcode_).replace(', ,', '')
+                    
+                    
+                    if ven.zipcode ==None and ven.street == None:
+                        add__ =  ven.city
+                        ven.formatted_address = ven.city
+                        ven.city = None
+                    
+                    (ven.latitude,ven.longitude)  = self.getLatlng(add__,'DE') #script_
                     redirecPhotos= rightInfo.find('./nav/div/ul/li[@class="tabOff tab_foto"]/a')
                     if redirecPhotos!=None:
                         linkPhotos =  redirecPhotos.get('href')
@@ -180,7 +191,7 @@ class Blaurabeit_de(BaseSite):
                     pTag = desElement.xpath('//div[@class="overview"]/p')
                     des = ''
                     for desE in pTag :
-                        des+= des+''.join(desE.itertext())
+                        des+=''.join(desE.itertext())
                     ven.description = self.validateDes(des)
                     certi = rightInfo.find('.//div/div[@id="cont_certs"]')
                     tablecerti =  certi.find('./table')
@@ -228,18 +239,20 @@ class Blaurabeit_de(BaseSite):
             return (None,None,None)
         address = address.split()
         for i in range(0,len(address)):
-            if address[i].isdigit() and len(address[i])>=5:
+            if address[i].isdigit() and len(address[i])>=4:
                 zipcode = address[i]
                 city = ' '.join(address[i+1:len(address)])
                 street = ' '.join(address[0:i])
                 return (street,city,zipcode)
-        return (None, None, None)
+        return (None, ''.join(address), None)
     def validateDes(self,des):
         for char in self.removeDes:
             if des.find(char)>=0:
                 des = des[0:des.find(char)]
         return des
     def getLatlng(self,address,countr):
+        if address.strip()=='':
+            return (None,None)
         try:
             jsonLatlng = Util.autoChange(address, countr)
             if jsonLatlng !=None:
@@ -258,3 +271,8 @@ class Blaurabeit_de(BaseSite):
                 return (None,None)
         except Exception,ex:
             return (None,None)
+    def validateFilename(self,name):
+        if name!=None:
+            for char in self.removeName:
+                name= name.replace(char,'')
+        return name
