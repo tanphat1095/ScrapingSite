@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<query xmlns:yahoo="http://www.yahooapis.com/v1/base.rng" yahoo:count="29" yahoo:created="2017-04-18T10:35:01Z" yahoo:lang="en-US">
+  <results>
+    <div class="marker-item left" data-city-group="Bad Bevensen" data-marker-id="26" typeof="Organization" vocab="http://schema.org/">
+      <h4 class="hlv-bold f12 cdarkgrey upper" property="name">Schneefuß-Optic</h4>
+      <div class="address" typeof="PostalAddress">
+        <p>Lüneburger Straße 6<br />29549 Bad Bevensen</p>
+      </div>
+      <div style="display:none;" typeof="PostalAddress">
+        <span property="streetAddress">268 To Hien Thanh</span>,                                        <span property="addressLocality">29549 Bad Bevensen</span></div>
+      <div property="location" style="display:none;">
+        <span typeof="Place">
+          <span content="53.0800634" property="latitude" />
+          <span content="10.5801265" property="longitude" />
+        </span>
+      </div>
+      <img alt="Becker + Flöge Logo" property="logo" src="media/content/becker+floege-logo.jpg" style="display:none;" />
+      <div class="description" property="description">
+        <p>
+          <i style="color: rgb(148, 140, 76);">
+            <b>Geschäftsleiterin</b>
+            <br />Christiane Wolter<br />Augenoptikermeisterin</i>
+        </p>
+        <p>
+Telefon: 0123456789<br />Telefax: 05821 7205</p>
+        <p>
+          <b>
+Öffnungszeiten</b>
+          <br />Montag–Freitag 9.00–18.00<br />Samstag 9.00–13.00</p>
+      </div>
+    </div>
+
+  
+  </results>
+</query>
+<!-- total: 6128 -->
+<!-- prod_sg3_1;paas.yql;queryyahooapiscomproductionsg3;6b3944e7-1f1c-11e7-b30d-9cb654822760 -->
