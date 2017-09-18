@@ -37,16 +37,15 @@ _24H_ES_DaysOfWeek = "Lunes-Domingo: 00:00-24:00"
 
 _24H_PL_DaysOfWeek = "Poniedziałek-Niedziela: 00:00-24:00"
 _24H_CZ_DaysOfWeek = "Pondĕlí-Nedĕle: 00:00-24:00"
-geocodeAPI_key = "AIzaSyDVUXo2fMFQzeg0OkIAXjcq5k4sy4x-yMU"
-#geocodeAPI_key = "AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s"
-#geocodeAPI_key = "AIzaSyCAfw9oD58hpN3SwG3tGannKhgIcOFnzbA"
-list_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
+geocodeAPI_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
             'AIzaSyC6xwNdTRA593eUQ58s1WiSrFuJqj5_58Y',
             'AIzaSyDE3_5U8G-Mxe2VVhBuKYnW-XoKM21z54A',
             'AIzaSyCqsFHXIZ5okyk7wgZkk09zTABy0mt0qMg',
             'AIzaSyBgOFAVElGalbpf8E77qFu4F4_1UAQgjG4',
             'AIzaSyBVcJQvNneYV5ElRYQ7Rt2nKHXVXDNCYbM',
             'AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s']
+
+
 
 def GetYQLResponse(select, url, xpath, spec=False):
     '''
@@ -121,7 +120,7 @@ def removesingleSpace(s):
 def removeSpecialChar(s, exceptchar=''):
     if s != None:
         firstchar = s[0]
-        charlst = ['*','-','/','(',')','.',',',':','+','\r\n','\r','\n']
+        charlst = ['*','-','/','(',')','.',',',':','+','\r','\n']
         for char in charlst:
             if exceptchar == 'pl' and char == '-':
                 continue
@@ -204,6 +203,7 @@ def getYQLXML2(select, url, xpath, spec=False):
     if spec=False: return a XML with xpath that response from URL input
     if spec=True: return html Document that respone from URL input
     '''
+
 def getRequestsXML(url,xpath,spec=False,encoding=True):
     try:
         headers = {
@@ -211,9 +211,10 @@ def getRequestsXML(url,xpath,spec=False,encoding=True):
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
         }
         response = requests.request("GET", url, headers=headers,timeout=(60,60),verify=False)        
-        htmlDocument = html.fromstring(response.content.decode(response.encoding))
         if encoding == False:
             htmlDocument = html.fromstring(response.content)
+        else:
+            htmlDocument = html.fromstring(response.content.decode(response.encoding))
         if spec == True:
             return htmlDocument
         else:
@@ -257,9 +258,6 @@ def WriteXMLToFile(folder, filename, xmlRoot):
     except:
         return False
 
-def CheckExistingFile(folder, filename):
-    return os.path.isfile("/".join([folder,filename]))
-
 def ReadXMLFromFile(folder,filename):
     try:
         if CheckExistingFile(folder,filename) == True:
@@ -269,74 +267,38 @@ def ReadXMLFromFile(folder,filename):
     except:
         return None
 
+def CheckExistingFile(folder, filename):
+    return os.path.isfile("/".join([folder,filename]))
+
 def getGEOCode(fulladdress,country):
     try:
-        url = "https://maps.googleapis.com/maps/api/geocode/json"
-        querystring = {
-                "address":fulladdress + "," + country,
-                "key":geocodeAPI_key
-            }
-        headers = {
-                'content-type': "application/x-www-form-urlencoded"
-            }
-        response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
-        #other way
-        #
-        json_location = response.json()
+        status = ''
+        index = 0
+        json_location = json.loads('{"status": null,"results":null}')
+        while status != "OK" and index < len(geocodeAPI_key):
+            APIKey = geocodeAPI_key[index]
+            url = "https://maps.googleapis.com/maps/api/geocode/json"
+            querystring = {
+                    "address":fulladdress + "," + country,
+                    "key":APIKey
+                }
+            headers = {
+                    'content-type': "application/x-www-form-urlencoded",
+                    'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+                    'x-chrome-uma-enabled': "1"
+                }
+            response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
+            json_location = response.json()
+            status = json_location.get('status')
+            if status == "OVER_QUERY_LIMIT":
+                index+=1
+            else:
+                break                        
         return json_location
     except Exception,ex:
+        
         return None
 
-def getGeoCode___(fulladdress,country,key):
-    try:
-        print list_key[key]
-        url = "https://maps.googleapis.com/maps/api/geocode/json"
-        querystring = {
-                "address":fulladdress + "," + country,
-                "key":list_key[key]
-                
-            }
-        headers = {
-                'content-type': "application/x-www-form-urlencoded"
-            }
-        response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
-        #other way
-        #
-        json_location = response.json()
-        return json_location     
-    except Exception,ex:
-            return None
-        
-def autoChange(fulladdress,country):
-    key =0
-    result = getGeoCode___(fulladdress, country, key)
-    if result ==None:
-        return None
-    else:
-        if result.get('status')=='OK':
-            return result
-        else:
-            while result.get('status')!='OK':
-                key+=1
-                if key <= (len(list_key)-1):
-                    result = getGeoCode___(fulladdress, country, key)
-                    if result.get('status')=='OK':
-                        return result
-                else:
-                    return None
-def checkAPI():
-    for key in range(0, len(list_key)):
-        temp ='10 Halfway Avenue, LUTON, LU48RB'
-        #temp ='LU48RB'
-        result = getGeoCode___(temp, 'UK', key)
-        if result !=None:
-            if result.get('status')=='OK':
-                print 'OK'
-            else:
-                print 'NOT OK'
-        else:
-            print '*'*5
-        
 def subtractTime(t1,t2):        
         # caveat emptor - assumes t1 & t2 are python times, on the same day and
         # t2 is after t1
@@ -361,7 +323,7 @@ def writelist2File(listVenues,outFile):
                 for myOrderedDict in listVenues:
                     csvwriter.writerow(myOrderedDict.values())
     except Exception,ex:
-        log.info(", ".join([unicode(ex.args)]))
+        log.running_logger.info(", ".join([unicode(ex.args)]))
 
 def ExportCSV(folder,filename):    
     listFiles = []
@@ -446,7 +408,7 @@ def ExportCSV(folder,filename):
                                     listServices.append(sv)
                         listVenues.append(jObj)
                 except Exception,ex:
-                    log.invalid(None,file + ': ' + ex.message)
+                    log.running_logger.info(file + ': ' + ex.message)
                     print file + ': ' + ex.message
                     continue
         if len(listVenues) > 0:

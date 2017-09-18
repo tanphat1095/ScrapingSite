@@ -29,6 +29,7 @@ class Blaurabeit_de(BaseSite):
     venues = []
     outFileVN = ''
     outFileSV = ''
+    linkIn=[]
     removeName =[':)',':','=))','=']
     removeDes= ['Mobil','Email','Tel:']
     bpfArray =['//div[@class="row row_b row_container clearfix"]',
@@ -87,7 +88,11 @@ class Blaurabeit_de(BaseSite):
                                 
                             pages+=1
     def __VenueParser(self,hqdb_type, linkItems,subcate,cate):    
-            #linkItems ='https://www.blauarbeit.de/p/babysitter-berlin/belumah/207707.htm'    
+            #linkItems ='https://www.blauarbeit.de/p/trockenbau/ruesselsheim/trockenbau_handwerk/951223.htm'
+            existing=[x for x in self.linkIn if linkItems in x]
+            if len(existing)>0:
+                print 'This venue exist in list'
+                return None
             xmlPages = self.getRequest(linkItems)
             #print ET.dump(xmlPages)
             #time.sleep(1)
@@ -123,7 +128,7 @@ class Blaurabeit_de(BaseSite):
                         if len(td)<2:
                             continue
                         key_ = ''.join(td[0].itertext()).strip()
-                        values_ = ''.join(td[1].itertext()).strip().replace('keine Angabe','')
+                        values_ = ' '.join(td[1].itertext()).strip().replace('keine Angabe','')
                         if key_ =='Ansprechpartner:':
                             if values_!=None and len(values_)>2:
                                 #values_ =''
@@ -131,7 +136,7 @@ class Blaurabeit_de(BaseSite):
                             
                         if key_ =='Addresse:':
                             address_ =  values_
-                            (ven.street,ven.city,ven.zipcode) = self.processAddress(address_)
+                            (ven.street,ven.city,ven.zipcode) = self.processAddress(address_.replace('\n', '||'))
                             
                         if key_ =='Homepage:':
                             a_ = td[1].find('./a')
@@ -191,7 +196,22 @@ class Blaurabeit_de(BaseSite):
                     pTag = desElement.xpath('//div[@class="overview"]/p')
                     des = ''
                     for desE in pTag :
+                        if ''.join(desE.itertext()).find('<xml>')>=0:
+                            continue
                         des+=''.join(desE.itertext())
+                    h5Tag = desElement.xpath('//div[@class="overview"]/h5')
+                    for desE_ in h5Tag:
+                        if ''.join(desE_.itertext()).find('<xml>')>=0:
+                            continue
+                        des += ''.join(desE_.itertext())
+                    divTag =desElement.xpath('//div[@class="overview"]/h5')
+                    for div_ in divTag:
+                        if ''.join(desE.itertext()).find('<xml>')>=0:
+                            continue
+                        des+= ''.join(div_.itertext())
+                    if len(pTag)==0 and len(h5Tag) ==0:
+                        if desElement.find('.//div[@class="overview"]')!=None:
+                            des =  desElement.find('.//div[@class="overview"]').text
                     ven.description = self.validateDes(des)
                     certi = rightInfo.find('.//div/div[@id="cont_certs"]')
                     tablecerti =  certi.find('./table')
@@ -237,9 +257,9 @@ class Blaurabeit_de(BaseSite):
     def processAddress(self, address):
         if address==None:
             return (None,None,None)
-        address = address.split()
+        address = address.replace('>','').split()
         for i in range(0,len(address)):
-            if address[i].isdigit() and len(address[i])>=4:
+            if address[i].isdigit() and len(address[i])==5:
                 zipcode = address[i]
                 city = ' '.join(address[i+1:len(address)])
                 street = ' '.join(address[0:i])
@@ -249,12 +269,12 @@ class Blaurabeit_de(BaseSite):
         for char in self.removeDes:
             if des.find(char)>=0:
                 des = des[0:des.find(char)]
-        return des
+        return des.replace('�','')
     def getLatlng(self,address,countr):
         if address.strip()=='':
             return (None,None)
         try:
-            jsonLatlng = Util.autoChange(address, countr)
+            jsonLatlng = Util.getGEOCode(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')
