@@ -1,5 +1,5 @@
 {
-    "adid": null, 
+    "adid": "7000142", 
     "name": "Allan G Hill & Partners Limited", 
     "name_of_contact": null, 
     "scrape_page": "http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm/results/details.html?isocountry=VN&location=&country=UK&firmname=a&organisationid=ACCA&hid=&pagenumber=25&resultsperpage=25&requestcount=7&advisorid=1990384", 
@@ -30,7 +30,6 @@
     "facebook": null, 
     "twitter": null, 
     "instagram": null, 
-    "venue_images": null, 
     "opening_hours_raw": null, 
     "pricelist_link": null, 
     "services": [

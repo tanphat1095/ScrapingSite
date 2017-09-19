@@ -1,5 +1,5 @@
 {
-    "adid": null, 
+    "adid": "2211867", 
     "name": "Advantage Accountancy & Advisory Ltd.", 
     "name_of_contact": null, 
     "scrape_page": "http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm/results/details.html?isocountry=VN&location=&country=UK&firmname=a&organisationid=ACCA&hid=&pagenumber=17&resultsperpage=25&requestcount=5&advisorid=4106916", 
@@ -30,7 +30,6 @@
     "facebook": null, 
     "twitter": null, 
     "instagram": null, 
-    "venue_images": null, 
     "opening_hours_raw": null, 
     "pricelist_link": null, 
     "services": [

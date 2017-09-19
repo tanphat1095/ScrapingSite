@@ -7,6 +7,7 @@ from Objects_HQDB import Venue
 import re
 import time
 from selenium import webdriver
+
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class Acca_gb(BaseSite):
@@ -127,10 +128,10 @@ class Acca_gb(BaseSite):
         ven.name = aTag.text.replace('/','-')
         ven.scrape_page =self.__url__+  link
         
-        #ven.name='Aptas Limited'
-        #ven.scrape_page ='http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm/results/details.html?isocountry=VN&location=&country=UK&firmname=a&organisationid=ACCA&hid=&pagenumber=9&resultsperpage=25&requestcount=3&advisorid=1168042'
+        #ven.name='A R Kazi & Co'
+        #ven.scrape_page ='http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm/results/details.html?isocountry=VN&location=&country=UK&firmname=a&organisationid=ACCA&hid=&pagenumber=5&resultsperpage=25&requestcount=2&advisorid=8011731'
         
-        xmlVenues = Util.getRequestsXML(ven.scrape_page, '//div[@class="content-section no-padding"]')
+        xmlVenues = Util.getRequestsXML(ven.scrape_page, '//div[@id="main"]') #//div[@class="content-section no-padding"]
         
         addressInfo = xmlVenues.xpath('//address')
         address_ = ''
@@ -142,6 +143,9 @@ class Acca_gb(BaseSite):
             
             
         servicesInfo =  xmlVenues.xpath('//div[@class="col-sm-7 col-md-8 firm-details-main text-section"]/div')
+        maps =  xmlVenues.find('.//div[@id="map"]')
+        if maps!=None:
+            maps = maps.get('data-address')
         for row in servicesInfo:
             if row.find('.//h5')!=None:
                 title = row.find('.//h5').text
@@ -186,11 +190,16 @@ class Acca_gb(BaseSite):
         
         if street!=None and len(street)>2:
             ven.formatted_address = ', '.join([street,city,zipcode])
-
-        
+            
+        #ven.zipcode = 'HA3 7QT'
+        #ven.formatted_address ='Unit A3, Livingstone Court, 55 Peel Road, Wealdstone Harrow HA3 7QT'
         (ven.latitude,ven.longitude) = self.getLatlng(ven.formatted_address, countr)
         if ven.latitude==None and ven.longitude==None:
-            (ven.latitude,ven.longitude) =  self.getLatlng(address_, countr)
+            (ven.latitude,ven.longitude) =  self.getLatlng(maps, countr)
+            if ven.latitude==None and ven.longitude==None:
+                (ven.latitude,ven.longitude) = self.getLatlng(ven.zipcode, countr)
+                if ven.latitude==None and ven.longitude == None:
+                    Util.log.running_logger.info(maps.replace('+',' ')+': '+ 'cannot get GEO code')
             
         li = contact.xpath('./ul/li')
         for l in li :

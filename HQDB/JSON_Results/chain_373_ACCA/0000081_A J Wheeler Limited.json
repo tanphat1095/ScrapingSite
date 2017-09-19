@@ -1,11 +1,11 @@
 {
-    "adid": null, 
+    "adid": "8000568", 
     "name": "A J Wheeler Limited", 
     "name_of_contact": null, 
     "scrape_page": "http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm/results/details.html?isocountry=VN&location=&country=UK&firmname=a&organisationid=ACCA&hid=&pagenumber=1&resultsperpage=25&requestcount=1&advisorid=8000568", 
     "business_website": null, 
     "areas_covered": null, 
-    "description": null, 
+    "description": "Sector expertise: -Charities -Distribution and Transport -Engineering -IT/Software -Manufacturing -Service Industries -Solicitors", 
     "img_link": null, 
     "hqdb_featured_ad_type": null, 
     "hqdb_nr_reviews": null, 
@@ -30,10 +30,71 @@
     "facebook": null, 
     "twitter": null, 
     "instagram": null, 
-    "venue_images": null, 
     "opening_hours_raw": null, 
     "pricelist_link": null, 
     "services": [
-        {}
+        {
+            "service_category": null, 
+            "service": "Business plans", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Business start-up and company formation", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Company secretarial service", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Internal audit and systems security", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Limited company accounts", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Management accounting consultancy", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Management advice to business", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Management consultancy", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }, 
+        {
+            "service_category": null, 
+            "service": "Partnership / sole trader accounts", 
+            "duration": null, 
+            "price": null, 
+            "description": null
+        }
     ]
 }

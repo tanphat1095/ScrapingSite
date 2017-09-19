@@ -43,7 +43,8 @@ geocodeAPI_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
             'AIzaSyCqsFHXIZ5okyk7wgZkk09zTABy0mt0qMg',
             'AIzaSyBgOFAVElGalbpf8E77qFu4F4_1UAQgjG4',
             'AIzaSyBVcJQvNneYV5ElRYQ7Rt2nKHXVXDNCYbM',
-            'AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s']
+            'AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s',
+            'AIzaSyDntti4ZJI6VDlDliPo7imO-8FZiNppN-w']
 
 
 
@@ -271,6 +272,7 @@ def CheckExistingFile(folder, filename):
     return os.path.isfile("/".join([folder,filename]))
 
 def getGEOCode(fulladdress,country):
+    #statusArr =['OVER_QUERY_LIMIT','REQUEST_DENIED']
     try:
         status = ''
         index = 0
@@ -289,11 +291,13 @@ def getGEOCode(fulladdress,country):
                 }
             response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
             json_location = response.json()
+            
             status = json_location.get('status')
-            if status == "OVER_QUERY_LIMIT":
-                index+=1
+            if status!='OVER_QUERY_LIMIT' and status!='REQUEST_DENIED':
+                break
             else:
-                break                        
+                print geocodeAPI_key[index]+' : '+ status
+                index+=1
         return json_location
     except Exception,ex:
         

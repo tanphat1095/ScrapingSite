@@ -5,7 +5,7 @@ import csv
 import unicodedata
 from urllib import quote_plus
 from urllib import urlencode
-#import geocoder
+import geocoder
 from validate_email import validate_email
 import re
 #import validators
@@ -27,7 +27,7 @@ def Country(country_id):
             break
         
     msg = "Validate Country: \"" + country_id + "\" is INVALID"     
-    Util.log.logResult("Country", msg, is_valid)
+    Util.log.running_logger.running_logger.logResult("Country", msg, is_valid)
     return country_name
 
 
@@ -36,7 +36,7 @@ def Email(email):
         return
     is_valid = validate_email(email)
     msg = "Validate Email: email \"" + email + "\" is valid"
-    Util.log.logResult("Email", msg, is_valid)
+    Util.log.running_logger.logResult("Email", msg, is_valid)
     
     
 def CityZipcode(city, zipcode):
@@ -55,9 +55,9 @@ def CityZipcode(city, zipcode):
             is_valid = True
             
         msg = "Validate City and Zipcode: \"" + location + "\" is not exist."
-        Util.log.logResult("City_Zipcode", msg, is_valid)
+        Util.log.running_logger.info("City_Zipcode " + msg + ': ' + is_valid)
     except Exception, ex:
-        Util.log.error("")
+        Util.log.running_logger.info(ex.message)
     
     
 def LatitudeLongitute(lat, lng, city, zipcode):
@@ -74,9 +74,9 @@ def LatitudeLongitute(lat, lng, city, zipcode):
             is_valid = is_valid and (zipcode.lower() in loc.postal.lower())
          
         msg = "Validate Latitude & Longitute: \"" + location + "\" is not match with <" + lat + ", " + lng + ">." 
-        Util.log.logResult("Latitude_Longitute", msg, is_valid)
+        Util.log.running_logger.info("Latitude_Longitute " + msg + ': ' + is_valid)
     except Exception, ex:
-        print ""
+        Util.log.running_logger.info(ex.message)
         
     
 def PhoneNumber(phone, country):
@@ -90,7 +90,7 @@ def PhoneNumber(phone, country):
         is_valid = False
         
     msg = "Valide Phone Number: \"" + phone + "\" is not Valid"
-    Util.log.logResult("Phone_Number", msg, is_valid)
+    Util.log.running_logger.info("Phone_Number " + msg + ': ' + is_valid)
     
 
 def ReValidPhone(phone,type='phone'):
@@ -142,7 +142,7 @@ def ReValidString(value):
             return None
         return Util.removedoubleSpace(value).strip()
     
-def ValidateGeoCode(fulladdress,country,lat,lng):
+def ValidateGeoCode(fulladdress,country,lat,lng,scrape_page=None):
     if fulladdress != None and country != None and lat != None and lng != None:
         GermanyChar = [['ä','ae'],['ö','oe'],['ü','ue'],['Ä','Ae'],['Ö','Oe'],['Ü','Ue'],['ß','ss']]
         if country == 'de' or country == 'at':
@@ -153,16 +153,18 @@ def ValidateGeoCode(fulladdress,country,lat,lng):
         if jsonLocation != None and jsonLocation.get('status').upper() == 'OK':
             latLo = str(jsonLocation.get('results')[0].get('geometry').get('location').get('lat'))
             lngLo = str(jsonLocation.get('results')[0].get('geometry').get('location').get('lng'))
-            dotIndex = latLo.find('.') + 4
+            dotIndex = latLo.find('.') + 3
             for c in range(min(dotIndex,len(lat))):
                 if lat[c] != latLo[c]:
+                    Util.log.coordinate_logger.warning(scrape_page + ': invalid GEO code (' + lat + ',' + lng + ')')
                     return False            
-            dotIndex = lngLo.find('.') + 4
+            dotIndex = lngLo.find('.') + 3
             for c in range(min(dotIndex,len(lng))):
                 if lng[c] != lngLo[c]:
+                    Util.log.coordinate_logger.warning(scrape_page + ': invalid GEO code (' + lat + ',' + lng + ')')
                     return False
         else:
-            Util.log.info(fulladdress + ',' + country + ': cannot get GEO code')            
+            Util.log.coordinate_logger.warning(fulladdress + ',' + country + ': cannot get GEO code')            
     return True
 
 def CheckURL(url):
@@ -173,7 +175,7 @@ def CheckURL(url):
     return ''
 
 def is_valid_url(url):
-    regex = re.compile(r'^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:%/?#[\]@!\$&\(\)\*\+,;=.]+$', re.IGNORECASE)
+    regex = re.compile(r'^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:%/?#[\]@!\$&\(\)\*\+,;=.]+$', re.IGNORECASE)
     return url is not None and regex.search(url)
 
 def RevalidURL(url):
@@ -189,7 +191,7 @@ def RevalidURL(url):
     return url
 
 def RevalidName(name,isGermany=False):
-    invalidchar = ['\\','/','*','?','"','<','>','|']
+    invalidchar = ['\\','/','*','?','"','<','>','|',':']
     GermanyChar = [['ä','ae'],['ö','oe'],['ü','ue'],['Ä','Ae'],['Ö','Oe'],['Ü','Ue'],['ß','ss']]
     OtherChar = [['À','A'],['Á','A'],['Â','A'],['Ã','A'],['Ä','A'],['Ç','C'],['È','E'],['É','E'],['Ê','E'],['Ë','E'],['Ì','I'],['Í','I'],['Î','I'],['Ï','I'],['Ñ','N'],['Ò','O'],['Ó','O'],['Ô','O'],['Õ','O'],['Ö','O'],['Š','S'],['Ú','U'],['Û','U'],['Ü','U'],['Ù','U'],['Ý','Y'],['Ÿ','Y'],['Ž','Z'],['à','a'],['á','a'],['â','a'],['ã','a'],['ä','a'],['ç','c'],['è','e'],['é','e'],['ê','e'],['ë','e'],['ì','i'],['í','i'],['î','i'],['ï','i'],['ñ','n'],['ò','o'],['ó','o'],['ô','o'],['õ','o'],['ö','o'],['š','s'],['ù','u'],['ú','u'],['û','u'],['ü','u'],['ý','y'],['ÿ','y'],['ž','z']]
     if name != None:
@@ -203,6 +205,8 @@ def RevalidName(name,isGermany=False):
             else:
                 for x in OtherChar:
                     name = name.replace(x[0],x[1])
+        else:
+            return "Invalid Name"
     return unicodedata.normalize('NFKD',name).encode('ascii','ignore')
 
 def is_valid_email(email):
@@ -214,12 +218,12 @@ def RevalidEmail(email):
             return None
         is_valid = is_valid_email(email)#validate_email(email,check_mx=True,smtp_timeout=20)
         if is_valid == False:
-            Util.log.invalid(email,email + " invalid email")
+            Util.log.running_logger.warning(email,email + " invalid email")
             return None
         else:
             return email
     except:
-        Util.log.info(email + ': cannot Validate')
+        Util.log.running_logger.info(email + ': cannot Validate')
         return email
     
     

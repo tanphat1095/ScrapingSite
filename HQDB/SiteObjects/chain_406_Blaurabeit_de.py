@@ -10,7 +10,9 @@ import urllib3
 import requests
 import time
 from lxml import html
+from audioop import add
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 class Blaurabeit_de(BaseSite):
     '''
@@ -71,10 +73,11 @@ class Blaurabeit_de(BaseSite):
                                 elementIems = xmlDoc.xpath(xpath_)
                                 for ele in elementIems:
                                     type_hqdb = ele.find('.//div[@class="col-inner"]/div')
-                                    if xpath_ =='//div[@class="row row_b row_container clearfix"]':
-                                        hqdb_type =None
+                                    if xpath_ =='//div[@class="row row_p row_container clearfix"]':
+                                        hqdb_type ="featured"
                                     else:
-                                        hqdb_type =  ''.join(type_hqdb.itertext()).strip()
+                                        #hqdb_type =  ''.join(type_hqdb.itertext()).strip()
+                                        hqdb_type ='none'
                                     linkItems = ele.find('.//div[@class="name"]//a').get('href')
                                     if linkItems.startswith('/'):
                                         linkItems= self.__url__+linkItems
@@ -88,12 +91,22 @@ class Blaurabeit_de(BaseSite):
                                 
                             pages+=1
     def __VenueParser(self,hqdb_type, linkItems,subcate,cate):    
-            #linkItems ='https://www.blauarbeit.de/p/trockenbau/ruesselsheim/trockenbau_handwerk/951223.htm'
+            #linkItems ='https://www.blauarbeit.de/p/babysitter-langenpreising/yvonne-daschner/171964.htm'
             existing=[x for x in self.linkIn if linkItems in x]
             if len(existing)>0:
                 print 'This venue exist in list'
                 return None
+            
+            
+            
+            
+            self.linkIn.append(linkItems)
+            
+            
+            
             xmlPages = self.getRequest(linkItems)
+            if xmlPages==None:
+                return None
             #print ET.dump(xmlPages)
             #time.sleep(1)
             xmlVen = xmlPages.xpath('//div[@class="page_move"]')
@@ -114,6 +127,7 @@ class Blaurabeit_de(BaseSite):
             ven.subcategory = subcate
             ven.category= cate
             address_= ''
+            ven.formatted_address=''
             img_link= []
             divInfo = xmlVen[0].find('.//div[@class="content_wrapper content_wrapper_main clearfix"]/div')
             if divInfo!=None:
@@ -136,7 +150,8 @@ class Blaurabeit_de(BaseSite):
                             
                         if key_ =='Addresse:':
                             address_ =  values_
-                            (ven.street,ven.city,ven.zipcode) = self.processAddress(address_.replace('\n', '||'))
+                            #(ven.street,ven.city,ven.zipcode) = self.processAddress(address_.replace('\n', '||'))
+                            ven.formatted_address = address_
                             
                         if key_ =='Homepage:':
                             a_ = td[1].find('./a')
@@ -159,28 +174,26 @@ class Blaurabeit_de(BaseSite):
                             rating2=None
                         ven.hqdb_nr_reviews = rating1
                         ven.hqdb_review_score = rating2
+                    
+                    
+                    if ven.hqdb_review_score==None:
+                        scoreIn = xmlVen[0].xpath('//div[@class="float_box"]//span[@class="txtLight"]/parent::div')
+                        if len(scoreIn)>0:
+                            core_ = scoreIn[0].text.replace(',','.')
+                            try:
+                                float(core_)
+                            except Exception,ex:
+                                core_ =None
+                            ven.hqdb_review_score = core_
                     script_ = xmlPages.xpath('./head/script')
                     
-                    city_ =''
-                    zipcode_=''
-                    street_= ''
-                    if ven.city!=None and len(ven.city)>=3:
-                        city_ =ven.city
-                    if ven.zipcode !=None and len(ven.zipcode)>=5:
-                        zipcode_ = ven.zipcode
-                    if ven.street !=None and len(ven.street)>=3:
-                        street_ = ven.street
-                    
-                        
-                    add__ = (street_+', '+city_+', '+zipcode_).replace(', ,', '')
-                    
-                    
-                    if ven.zipcode ==None and ven.street == None:
-                        add__ =  ven.city
-                        ven.formatted_address = ven.city
-                        ven.city = None
-                    
-                    (ven.latitude,ven.longitude)  = self.getLatlng(add__,'DE') #script_
+                    (ven.latitude,ven.longitude)  = self.getLatlng(ven.formatted_address,'DE') #script_
+                    if ven.latitude== None and ven.longitude == None:
+                        zipFrom = self.findZipcode(ven.formatted_address)
+                        if zipFrom!=None:
+                            (ven.latitude,ven.longitude) = self.getLatlng(zipFrom, 'DE')
+                            if ven.latitude ==None and ven.longitude==None:
+                                Util.log.running_logger.info(address+' : cannot get GEO code')
                     redirecPhotos= rightInfo.find('./nav/div/ul/li[@class="tabOff tab_foto"]/a')
                     if redirecPhotos!=None:
                         linkPhotos =  redirecPhotos.get('href')
@@ -206,7 +219,7 @@ class Blaurabeit_de(BaseSite):
                         des += ''.join(desE_.itertext())
                     divTag =desElement.xpath('//div[@class="overview"]/h5')
                     for div_ in divTag:
-                        if ''.join(desE.itertext()).find('<xml>')>=0:
+                        if ''.join(div_.itertext()).find('<xml>')>=0:
                             continue
                         des+= ''.join(div_.itertext())
                     if len(pTag)==0 and len(h5Tag) ==0:
@@ -272,7 +285,8 @@ class Blaurabeit_de(BaseSite):
         return des.replace('�','')
     def getLatlng(self,address,countr):
         if address.strip()=='':
-            return (None,None)
+            #return (None,None)
+            address = 'null'
         try:
             jsonLatlng = Util.getGEOCode(address, countr)
             if jsonLatlng !=None:
@@ -286,8 +300,10 @@ class Blaurabeit_de(BaseSite):
                             lng = location.get('lng')
                             return(str(lat),str(lng))
                 else:
+                 
                     return (None,None)
             else:
+             
                 return (None,None)
         except Exception,ex:
             return (None,None)
@@ -296,3 +312,13 @@ class Blaurabeit_de(BaseSite):
             for char in self.removeName:
                 name= name.replace(char,'')
         return name
+    def findZipcode(self,address):
+        if address!=None:
+            address_ =  address.split()
+            for add in address_:
+                if len(add)==5 and add.isdigit():
+                    return add
+        return None
+    
+    
+    
