@@ -79,7 +79,7 @@ class Unbiased_gb(BaseSite):
         index =0
         for url_i in self._url_lstVenues:
             for post_ in postcode : 
-                timeSleep =3
+                timeSleep =10
                 url_find = url_i+ str(post_)
                 
                 url_hash = self.getUrlSelenium(url_find,timeSleep)
@@ -87,7 +87,7 @@ class Unbiased_gb(BaseSite):
                     print 'Retry get Hash...'
                     timeSleep+=1
                     url_hash = self.getUrlSelenium(url_find,timeSleep)
-                    if timeSleep>=20:
+                    if timeSleep>=15:
                         break
                 if url_hash ==None:
                     continue
@@ -116,6 +116,7 @@ class Unbiased_gb(BaseSite):
                         if ven!=None:
                             ven.writeToFile(self.folder,index,ven.name.replace('/','-').replace(':',' '),False)
                             index+=1
+                            
                    
                 except:
                     sleep(5)
@@ -153,25 +154,18 @@ class Unbiased_gb(BaseSite):
          ven.scrape_page = url
          #ven.pricelist_link = [url]
          self.list_url.append(url__)
-         url ='https://www.unbiased.co.uk/profile/financial-adviser/stiles-company-financial-services-petersfield-ltd-511274'
+         #url ='https://www.unbiased.co.uk/profile/financial-adviser/stiles-company-financial-services-petersfield-ltd-511274'
          xmlRequest = Util.getRequestsXML(url,'//div[@class="container-fluid"]')
          if xmlRequest !=None:
             stringAddress = xmlRequest.find('.//span[@class="profile-meta__address"]').text.replace(',,',',')
-            
-            ven.name =' Stiles & Company Financial Services (Petersfield) Ltd '
-            
-            #ven.formatted_address = stringAddress.replace(ven.name.strip(),'')
             ven.formatted_address = self.removeNameFromAdd(ven.name.strip(), stringAddress)
             
             
             
             
-            #ven.street = stringAddress.split(',')[0]
-            #ven.areas_covered = ', '.join(stringAddress.split(',')[-2:])
-            #ven.zipcode = ven.areas_covered.split(',')[1]
-            #ven.city =  ven.areas_covered.split(',')[0]
+            
             phoneLabel = xmlRequest.xpath('.//span[@class="phone-label"]/parent::a')
-            #phoneLabel = xmlRequest.xpath('.//a[@class="cta gtm-profile-number gtm-phone-click-to-reveal ng-scope"]')
+         
             if len(phoneLabel)>0:
                 for phone_ in phoneLabel:
                     phone= phone_.get('data-phone').replace('\n','').replace(' ','')

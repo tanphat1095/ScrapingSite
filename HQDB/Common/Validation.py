@@ -218,7 +218,7 @@ def RevalidEmail(email):
             return None
         is_valid = is_valid_email(email)#validate_email(email,check_mx=True,smtp_timeout=20)
         if is_valid == False:
-            Util.log.running_logger.warning(email,email + " invalid email")
+            Util.log.running_logger.warning(email + " invalid email")
             return None
         else:
             return email

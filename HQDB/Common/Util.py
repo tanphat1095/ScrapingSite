@@ -38,13 +38,15 @@ _24H_ES_DaysOfWeek = "Lunes-Domingo: 00:00-24:00"
 _24H_PL_DaysOfWeek = "Poniedziałek-Niedziela: 00:00-24:00"
 _24H_CZ_DaysOfWeek = "Pondĕlí-Nedĕle: 00:00-24:00"
 geocodeAPI_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
-            'AIzaSyC6xwNdTRA593eUQ58s1WiSrFuJqj5_58Y',
-            'AIzaSyDE3_5U8G-Mxe2VVhBuKYnW-XoKM21z54A',
-            'AIzaSyCqsFHXIZ5okyk7wgZkk09zTABy0mt0qMg',
-            'AIzaSyBgOFAVElGalbpf8E77qFu4F4_1UAQgjG4',
-            'AIzaSyBVcJQvNneYV5ElRYQ7Rt2nKHXVXDNCYbM',
-            'AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s',
-            'AIzaSyDntti4ZJI6VDlDliPo7imO-8FZiNppN-w']
+                  'AIzaSyC6xwNdTRA593eUQ58s1WiSrFuJqj5_58Y',
+                  'AIzaSyCqsFHXIZ5okyk7wgZkk09zTABy0mt0qMg',
+                  'AIzaSyBgOFAVElGalbpf8E77qFu4F4_1UAQgjG4',
+                  'AIzaSyBVcJQvNneYV5ElRYQ7Rt2nKHXVXDNCYbM',
+                  'AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s',
+                  'AIzaSyDntti4ZJI6VDlDliPo7imO-8FZiNppN-w',  
+                  'AIzaSyDEjA8msKq-WlkOfEFBElctj3QBB4ASPrQ',
+                  'AIzaSyB9--gWXJs1eaFc7x4ibapYMsI9lgySENs',
+                  'AIzaSyCr8HcTZ40PklYd_7AdMKu4RdlzRCXeMkQ']
 
 
 
@@ -225,6 +227,7 @@ def getRequestsXML(url,xpath,spec=False,encoding=True):
                 root.append(xml)
             return root
     except Exception,ex:
+        print ex
         return None
 
 def getSeleniumXML(url,xpath,xPathelemenClick=None):

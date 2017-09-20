@@ -61,7 +61,9 @@ class Acca_gb(BaseSite):
                print 'Find with: '+str(post)
                stop_1 = False
                stop_2 =False
+            
                isTable = Util.getRequestsXML(url,'//table[@class="table-responsive firm-search-results expandable-rows"]')
+              
                while len(isTable)>0:
                    page = countRequest*4-3
                    url = self.url_(page,post,countRequest,countr)
@@ -120,16 +122,11 @@ class Acca_gb(BaseSite):
         link =  aTag.get('href')
         
         findCity  = locate.find('./div')
-        '''servicesstr ='Business plans, Business start-up and company formation, Limited company accounts, Management advice to business, Partnership / sole trader accounts, Tax(CGT, Corporate, IHT, Personal and VAT)'
-        ser__ = self.__ServicesParser(servicesstr)
-        for s in ser__ :
-            print s.service'''
         ven.business_email=''
         ven.name = aTag.text.replace('/','-')
         ven.scrape_page =self.__url__+  link
         
-        #ven.name='A R Kazi & Co'
-        #ven.scrape_page ='http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm/results/details.html?isocountry=VN&location=&country=UK&firmname=a&organisationid=ACCA&hid=&pagenumber=5&resultsperpage=25&requestcount=2&advisorid=8011731'
+      
         
         xmlVenues = Util.getRequestsXML(ven.scrape_page, '//div[@id="main"]') #//div[@class="content-section no-padding"]
         
@@ -186,20 +183,18 @@ class Acca_gb(BaseSite):
         
         ven.city = city
         ven.zipcode = zipcode
-        ven.street = street
+        ven.street = self.validateStreet(street)
         
-        if street!=None and len(street)>2:
-            ven.formatted_address = ', '.join([street,city,zipcode])
+        
+        
             
         #ven.zipcode = 'HA3 7QT'
-        #ven.formatted_address ='Unit A3, Livingstone Court, 55 Peel Road, Wealdstone Harrow HA3 7QT'
-        (ven.latitude,ven.longitude) = self.getLatlng(ven.formatted_address, countr)
+        #ven.formatted_address =''
+        (ven.latitude,ven.longitude) = self.getLatlng(maps, countr)
         if ven.latitude==None and ven.longitude==None:
-            (ven.latitude,ven.longitude) =  self.getLatlng(maps, countr)
-            if ven.latitude==None and ven.longitude==None:
-                (ven.latitude,ven.longitude) = self.getLatlng(ven.zipcode, countr)
-                if ven.latitude==None and ven.longitude == None:
-                    Util.log.running_logger.info(maps.replace('+',' ')+': '+ 'cannot get GEO code')
+            (ven.latitude,ven.longitude) = self.getLatlng(ven.zipcode, countr)
+            if ven.latitude==None and ven.longitude == None:
+                Util.log.running_logger.info(maps.replace('+',' ')+': '+ 'cannot get GEO code')
             
         li = contact.xpath('./ul/li')
         for l in li :
@@ -217,30 +212,27 @@ class Acca_gb(BaseSite):
                             ven.business_website = 'http://'+ website
                 else: 
                     phone = l.text.replace(' ','')
-               
-                    
                     finds=  phone.find('/')
                     if finds >=0:
                         phone_ = phone.split('/')
                         if len(phone_) >=2:
                             phone_1 = phone_[0]
-                            
                             phone_2 = phone_[1]
                             phone_2 = phone_1[0:len(phone_1)-len(phone_2)]+ phone_2
-                            if phone.startswith('07') | phone.startswith('7'):
-                               ven.mobile_number = self.valiDatePhone(phone_1)
+                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447'):
+                                ven.mobile_number = self.valiDatePhone(phone_1)
                             else:
-                               ven.office_number = self.valiDatePhone(phone_1)
-                            if phone.startswith('07') | phone.startswith('7'):
-                               ven.mobile_number2 = self.valiDatePhone(phone_2)
+                                ven.office_number = self.valiDatePhone(phone_1)
+                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447'):
+                                ven.mobile_number2 = self.valiDatePhone(phone_2)
                             else:
-                               ven.office_number2 = self.valiDatePhone(phone_1)
+                                ven.office_number2 = self.valiDatePhone(phone_2)
                     else:
 
-                           if phone.startswith('07') | phone.startswith('7'):
-                               ven.mobile_number = self.valiDatePhone(phone)
-                           else:
-                               ven.office_number = self.valiDatePhone(phone)
+                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447'):
+                                ven.mobile_number = self.valiDatePhone(phone)
+                            else:
+                                ven.office_number = self.valiDatePhone(phone)
       
       
             
@@ -386,3 +378,16 @@ class Acca_gb(BaseSite):
                             ser.service = ser_services  
                             sers.append(ser) 
                          return sers
+    def validateStreet(self, street):
+        if street==None:
+            return None
+        street = street.strip()
+        if street.startswith(','):
+            street= street[1:len(street)]
+        if len(street)<=1:
+            street= None
+        return street
+    def duplicatePhone(self, phone_1,phone_2):
+        if phone_1.strip() == phone_2.strip():
+            return (phone_1,None)
+        return (phone_1,phone_2)
