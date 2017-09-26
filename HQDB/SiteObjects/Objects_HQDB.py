@@ -102,48 +102,45 @@ class Venue(object):
             self.longitude = None
         self.opening_hours_raw = Validator.ReValidString(self.opening_hours_raw)
     
-    def getFullAddress(self):            
-        if self.street != None and self.street.strip() != "":            
-            self.formatted_address = self.street
-        if self.city != None and self.city.strip() != "":
-            if self.formatted_address == None:
-                self.formatted_address = self.city
-            else: 
-                self.formatted_address = self.formatted_address.strip()
-                self.formatted_address += ", " + self.city
-        if self.zipcode != None and self.zipcode.strip() != "":
-            if self.formatted_address == None:
-                self.formatted_address = self.zipcode
-            else: 
-                self.formatted_address = self.formatted_address.strip()
-                self.formatted_address += ", " + self.zipcode
-        if self.formatted_address != None and self.formatted_address.strip() == "":
-            self.formatted_address = None                    
-
+    def getFullAddress(self): 
+        temp = []           
+        if self.street != None:
+            temp.append(self.street)
+        if self.city != None:
+            temp.append(self.city)
+        if self.zipcode != None:
+            temp.append(self.zipcode)
+        temp = ', '.join(temp)
+        if temp == '':
+            temp = None
+        if self.formatted_address == None:
+            self.formatted_address = temp
                           
     def __reValidInfoJSON(self):
+        self.scrape_page = self.scrape_page.replace(' ','%20')
         self.adid = Validator.ReValidString(self.adid)
         self.name = Validator.ReValidString(self.name)
-        self.name_of_contact = Validator.ReValidString(self.name_of_contact)        
-        self.business_website = Validator.RevalidURL(self.business_website)
+        self.name_of_contact = Validator.ReValidString(self.name_of_contact)                
         if self.business_website != None:
-            try:
-                mongo_validator = URLField()
-                mongo_validator.validate(self.business_website)
-            except:
-                Util.log.invalid(self.business_website,self.business_website + ': Invalid URL')
+            self.business_website = self.business_website.replace(' ','%20')
+            if Validator.RevalidURL(self.business_website) == False:            
+                Util.log.running_logger.error('{0}: {1}: {2}'.format(self.scrape_page,'Invalid URL',self.business_website))
                 self.business_website = None                
         self.areas_covered = Validator.ReValidString(self.areas_covered)
         self.formatted_address = Validator.ReValidString(self.formatted_address)
         self.description = Validator.ReValidString(self.description)        
-        if self.img_link != None and len(self.img_link) > 0:
-            for i in range(len(self.img_link)):
-                if Validator.is_valid_url(self.img_link[i]) == None:
-                    Util.log.invalid(self.img_link,"Invalid URL: " + self.img_link[i])
-                else:
-                    self.img_link[i] = Validator.RevalidURL(self.img_link[i])
-            self.img_link = [Validator.ReValidString(x) for x in self.img_link]
-            self.img_link = [x for x in self.img_link if x != None]
+        if self.img_link != None and isinstance(self.img_link,list) == True:
+            img_temp = []
+            for img in self.img_link:
+                img = img.replace(' ','%20')
+                if Validator.RevalidURL(img) == False:
+                    Util.log.running_logger.error('{0}: {1}: {2}'.format(self.scrape_page,'Invalid Img_Link',img))
+                else:                    
+                    img_temp.append(img)               
+            self.img_link = img_temp
+        elif self.img_link != None:
+            print 'img_link: is not a list' 
+            return False
         self.hqdb_featured_ad_type = Validator.ReValidString(self.hqdb_featured_ad_type)
         self.hqdb_nr_reviews = Validator.ReValidString(self.hqdb_nr_reviews)
         self.hqdb_review_score = Validator.ReValidString(self.hqdb_review_score)        
@@ -171,50 +168,33 @@ class Venue(object):
             self.unidentified_phone_numbers = None
         self.latitude = Validator.ReValidString(self.latitude)
         self.longitude = Validator.ReValidString(self.longitude)
-        self.business_email = Validator.RevalidEmail(Validator.ReValidString(self.business_email))
         if self.business_email != None:
-            try:
-                mongo_validator = EmailField()
-                mongo_validator.validate(self.business_email)
-            except:
-                Util.log.invalid(self.business_email,self.business_email + ': Invalid Email')
+            if Validator.RevalidEmail(self.business_email) == False:
+                Util.log.running_logger.error('{0}: {1}: {2}'.format(self.scrape_page, 'Invalid Email', self.business_email))
                 self.business_email = None
-        self.yelp_page = Validator.RevalidURL(self.yelp_page)
-        self.facebook = Validator.RevalidURL(self.facebook)
-        self.twitter = Validator.RevalidURL(self.twitter)
-        self.instagram = Validator.RevalidURL(self.instagram)
+        if self.yelp_page != None and Validator.RevalidURL(self.yelp_page) == False:
+            self.yelp_page = None
+        if self.facebook != None and Validator.RevalidURL(self.facebook) == False:
+            self.facebook = None
+        if self.twitter != None and Validator.RevalidURL(self.twitter) == False:
+            self.twitter = None
+        if self.instagram != None and Validator.RevalidURL(self.instagram) == False:
+            self.instagram = None        
         self.venue_images = Validator.ReValidString(self.venue_images) 
-        if self.venue_images != None and Validator.is_valid_url(self.venue_images) == None:
-            Util.log.invalid(self.venue_images,"Invalid URL" + self.venue_images)
-        elif self.venue_images != None:
-            self.venue_images = Validator.RevalidURL(self.venue_images)
-        #if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude) == False:            
-        #    Util.log.invalid('GEO code',self.scrape_page + ': invalid GEO code (' + self.latitude + ',' + self.longitude + ')')
-        #    self.latitude = None
-        #    self.longitude = None
+        if self.venue_images != None:
+            self.venue_images = self.venue_images.replace(' ','%20')
+            if Validator.RevalidURL(self.venue_images) == False:            
+                Util.log.running_logger.error('{0}: {1}: {2}'.format(self.scrape_page,"Invalid Venue_Image: ",self.venue_images))
+                self.venue_images = None        
+        if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude,self.scrape_page) == False:            
+            self.latitude = None
+            self.longitude = None
         self.opening_hours_raw = Validator.ReValidString(self.opening_hours_raw)
-
-    
-    def validate(self):
-        Util.log.info("----------------------- Validating Venue: " + self.name)
-        Validator.CityZipcode(self.city, self.zipcode)
-        Validator.Country(self.country)
-        Validator.LatitudeLongitute(self.latitude, self.longitude, self.city, self.zipcode)
-        Validator.Email(self.business_email)
-        Validator.Link(self.business_business_website)
-        Validator.PhoneNumber(self.office_number, self.country)
-        Validator.PhoneNumber(self.mobile_number, self.country)
-        Validator.PhoneNumber(self.office_number2, self.country)
-        Validator.PhoneNumber(self.office_number2, self.country)
-        Validator.PhoneNumber(self.unidentified_phone_numbers, self.country)
-        Validator.Link(self.facebook_page)
-        Validator.Link(self.yelp_page)
-        if self.pricelist_link != None:
-            for link in self.pricelist_link:
-                Validator.Link(link)
+        return True    
         
     def toOrderDict(self):            
-        self.__reValidInfo()             
+        if self.__reValidInfo() == False:
+            raise Exception('Validator Error')
         order = OrderedDict([('adid',self.adid),
                              ('name',self.name),
                              ('name_of_contact',self.name_of_contact),                             
@@ -251,7 +231,8 @@ class Venue(object):
         return order
     
     def toJSON(self):            
-        self.__reValidInfoJSON() 
+        if self.__reValidInfoJSON() == False:
+            raise Exception('Validator Error')
         services_tmp = []
         if self.services != None and len(self.services) > 0:
             services_tmp = []
@@ -301,15 +282,18 @@ class Venue(object):
     def writeToFile(self,folder, index, filename,spec=False):
         try:
             if filename != None:
-                filename = Validator.RevalidName(filename)
+                filename = Validator.RevalidName(filename)                
             index = '%0*d' % (7, index) 
-            outputFile = folder + "/" + index + "_" + filename + ".json"
+            if len(filename) > 260 - len(folder) - 12:
+                filename = Util.SubString(filename,260 - len(folder) - 12)
+            outputFile = folder + "/" + index + "_" + filename + ".json"           
+            jObject = self.toJSON()
             if spec == True:
                 with codecs.open(outputFile, "w", encoding='utf-8') as f:
-                    f.write(unicode(self.toJSON()).encode("utf8"))
-            else:
+                    f.write(unicode(jObject).encode("utf8"))
+            else:                
                 with io.open(outputFile, 'w',encoding='utf-8') as f:
-                    f.write(self.toJSON().decode('unicode-escape'))
+                    f.write(jObject.decode('unicode-escape'))
         except BaseException as ex:
             print ('Error when write json file: ', ex)
             raise      
@@ -325,7 +309,8 @@ class Service(object):
     def __init__(self):    
         ''
         
-    def __reValidInfo(self):        
+    def __reValidInfo(self):  
+        self.service_category = Validator.ReValidString(self.service_category)      
         self.service = Validator.ReValidString(self.service)
         self.description = Validator.ReValidString(self.description)
         self.service_category = Validator.ReValidString(self.service_category)

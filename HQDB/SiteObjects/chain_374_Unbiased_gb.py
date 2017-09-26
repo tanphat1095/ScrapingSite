@@ -7,15 +7,14 @@ from SiteObjects.Objects_HQDB import Venue, Service
 import re
 import json
 import time
-import requests.packages.urllib3
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from time import sleep
-#from pyvirtualdisplay import Display
-requests.packages.urllib3.disable_warnings()
+
 class Unbiased_gb(BaseSite):
     """description of class"""
     phoneCodeList = None
@@ -27,11 +26,6 @@ class Unbiased_gb(BaseSite):
                       'https://www.unbiased.co.uk/advisers/mortgage-adviser?search=',
                       'https://www.unbiased.co.uk/advisers/solicitor?search=',
                       'https://www.unbiased.co.uk/advisers/accountant?search=']
-
-    __url_profile =['https://www.unbiased.co.uk/profile/financial-adviser/',
-                    'https://www.unbiased.co.uk/profile/mortgage-adviser/',
-                    'https://www.unbiased.co.uk/profile/solicitor/',
-                    'https://www.unbiased.co.uk/profile/accountant/'] # + companyslug + id + ?hash=8571913
     hash_url ='https://www.unbiased.co.uk/advisers/hash/'
     _xpath_lstVenues = ''        
     _url_lstServices = ''
@@ -43,34 +37,20 @@ class Unbiased_gb(BaseSite):
     list_url =[]
     vens=[]
     serv=[]
-    
+    listPhoneremove =['01615069963','01615069598']
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
         self._output = output
         self._isWriteList = isWriteList
-    
-    
     def doWork(self):
-        #Set OutFile Values
-    #    self.outFileVN = self.folder + '/' + self._chain_ + '_' + Validation.RevalidName(self.__name__) + '_Venues.csv'
-     #   self.outFileSV = self.folder + '/' + self._chain_ + '_' + Validation.RevalidName(self.__name__) + '_Services.csv'
+  
         self.phoneCodeList = Util.getPhoneCodeList()
-        #self.getUrlSelenium('https://www.unbiased.co.uk/advisers/mortgage-adviser?search=MK1')
-        self.__getListVenues()
-        '''
-        Code Here
-        '''       
+        
+        self.__getListVenues()    
         for items in range(0,len(self.venues)):
             ven = self.venues[items]
             if ven!=None:
                 ven.writeToFile(self.folder,items,False)
-                #self.vens.append(ven.toOrderDict())
-            
-        #Write Files
-        #if len(self.venues) > 0:
-        #    Util.writelist2File(self.vens,self.outFileVN)
-        #if len(self.services) > 0:
-        #    Util.writelist2File(self.services,self.outFileSV)
     def __getListVenues(self):
         print "Getting list of Venues"
         files_ = open('Data/EngCity.txt','r')
@@ -79,15 +59,15 @@ class Unbiased_gb(BaseSite):
         index =0
         for url_i in self._url_lstVenues:
             for post_ in postcode : 
-                timeSleep =10
+                timeSleep =20
                 url_find = url_i+ str(post_)
                 
                 url_hash = self.getUrlSelenium(url_find,timeSleep)
                 while url_hash ==None:
                     print 'Retry get Hash...'
-                    timeSleep+=1
+                    timeSleep+=5
                     url_hash = self.getUrlSelenium(url_find,timeSleep)
-                    if timeSleep>=15:
+                    if timeSleep>=40:
                         break
                 if url_hash ==None:
                     continue
@@ -107,24 +87,21 @@ class Unbiased_gb(BaseSite):
                 print self.hash_url+str(hash)
                 try:
                     jsonString = self.getRequestsXML(self.hash_url+hash)
-                    #jsonString = self.getRequestsXML('https://www.unbiased.co.uk/advisers/hash/8637272')
+                    #jsonString = self.getRequestsXML('https://www.unbiased.co.uk/advisers/hash/8775209')
                     json_ = json.loads(jsonString)
                     brands = json_.get('data').get('branches') 
                     print 'Postcode: '+ post_+' Record:'+ str(len(brands))
                     for items in brands:
+                        
                         ven = self.__VenueParser(items,hash)
                         if ven!=None:
                             ven.writeToFile(self.folder,index,ven.name.replace('/','-').replace(':',' '),False)
                             index+=1
-                            
-                   
                 except:
                     sleep(5)
                     continue
-                #jsonString = self.getRequestsXML('https://www.unbiased.co.uk/advisers/hash/8627543')
-                
-                        #self.venues.append(ven.toOrderDict())
-                
+                    
+
     def __VenueParser(self,jsonItems,hash):           
         url = self.__url__+'profile/'+jsonItems.get('serviceSlug')+'/'+ jsonItems.get('companySlug')+'-'+jsonItems.get('id')+'?hash='+hash
         url__ = self.__url__+'profile/'+jsonItems.get('serviceSlug')+'/'+ jsonItems.get('companySlug')+'-'+jsonItems.get('id')
@@ -140,6 +117,8 @@ class Unbiased_gb(BaseSite):
          ven.category =  jsonItems.get('restriction').get('name')
          ven.adid = str(jsonItems.get('id'))
          ven.name = jsonItems.get('companyName')
+         
+         
          ven.latitude = jsonItems.get('coordinates').get('lat')
          ven.longitude = jsonItems.get('coordinates').get('long')
          ven.venue_images = jsonItems.get('logo')
@@ -149,7 +128,7 @@ class Unbiased_gb(BaseSite):
          else:
              ven.hqdb_review_score = str(points_)      
          #ven.img_link = [url]
-         ven.description = jsonItems.get('salesPitch')
+         #ven.description = jsonItems.get('salesPitch')
          ven.country ='gb'
          ven.scrape_page = url
          #ven.pricelist_link = [url]
@@ -158,7 +137,7 @@ class Unbiased_gb(BaseSite):
          xmlRequest = Util.getRequestsXML(url,'//div[@class="container-fluid"]')
          if xmlRequest !=None:
             stringAddress = xmlRequest.find('.//span[@class="profile-meta__address"]').text.replace(',,',',')
-            ven.formatted_address = self.removeNameFromAdd(ven.name.strip(), stringAddress)
+            ven.formatted_address = self.removeNameFromAdd(ven.name.strip(), stringAddress).replace('PO BOX','').replace('PO Box','').replace('Po Box','')
             
             
             
@@ -171,8 +150,9 @@ class Unbiased_gb(BaseSite):
                     phone= phone_.get('data-phone').replace('\n','').replace(' ','')
                     if phone.find('Shownumber')<=0:
                         phone = self.validatePhone(phone)
-                        if phone =='01615069963':
-                            phone = None
+                        for rePhone  in self.listPhoneremove:
+                            if phone == rePhone:
+                                phone = None
                         if phone!=None:
                             if phone.startswith('07'):
                                 ven.mobile_number = phone
@@ -181,14 +161,59 @@ class Unbiased_gb(BaseSite):
                             break
             services = xmlRequest.find('.//ul[@class="advice-area__level-one"]')
             if services!=None:
-                list_ser = services.xpath('./li/span')
+                list_ser = services.xpath('./li')
                 for ser_name  in list_ser:
-                    services_ = Service()
-                    services_.service = ser_name.text
-                    #services_.scrape_page = ven.scrape_page
-                    services_v.append(services_)
-                    #self.services.append(services_.toOrderDict())
+                  
+                    # feedback 3 : add category service
+                    
+                    cate = ser_name.find('./span').text.strip()
+                    list_services = ser_name.xpath('./ul/li')
+                    for service__ in list_services:
+                        service = Service()
+                        service.service_category = cate + ' advice'
+                        service.service = service__.text +' advice'
+                        services_v.append(service)
+                    
+                    
             ven.services = services_v
+            
+            
+            
+            # append accreditations feedback 3
+            certi =[]
+            cer =  xmlRequest.xpath('.//div[@class="profile-team__skill-item collapsed"]')
+            for c in cer :
+                inCerti=[x_ for x_ in certi if c.text in x_]
+                if len(inCerti)<=0:
+                    certi.append(c.text)
+                    
+            ven.accreditations = ', '.join(certi)
+            
+            
+            
+            # add follow :  fb, twi, website feedback 3
+            follow = xmlRequest.xpath('//div[@class="profile__follow"]/ul/li')
+            for fol in follow:
+                values_fol =  fol.get('class')
+                if values_fol =='icon-soc-tw':
+                    ven.twitter = fol.find('./a').get('href')
+                if values_fol =='icon-soc-www':
+                    ven.business_website = fol.find('./a').get('href')
+                if values_fol =='icon-soc-fb':
+                    ven.facebook = fol.find('./a').get('href')
+                
+                        
+            # description feedback 3
+            
+            des_1 = xmlRequest.find('.//div[@class="profile__text-block "]/p')
+            if des_1!=None:
+                ven.description= ''.join(des_1.itertext()).replace('.\n',' | ')
+            des_2= xmlRequest.find('.//div[@class="profile__text-block spacing-bottom-xs-0"]/p')
+            if des_2!=None:
+                ven.description+=' -Our services: '+''.join(des_2.itertext()).replace('.\n',' | ')
+            if ven.description!=None:
+                if ven.description.endswith(' | '):
+                    ven.description = ven.description[0:len(ven.description)-2]
             return ven
         else:
             return None
@@ -209,9 +234,9 @@ class Unbiased_gb(BaseSite):
             driver.start_client()
             driver.set_page_load_timeout(delay)
             driver.get(url)                     
-            page_state = driver.execute_script('return document.readyState;')
+            """page_state = driver.execute_script('return document.readyState;')
             while page_state != 'complete':            
-                page_state = driver.execute_script('return document.readyState;')     
+                page_state = driver.execute_script('return document.readyState;')"""  
             time.sleep(timeSleep)
             currentUrl= driver.current_url
             result = currentUrl
@@ -230,6 +255,7 @@ class Unbiased_gb(BaseSite):
         return response.content
     def validatePhone(self,phone):
         if phone.isdigit():
+            
             if phone.startswith('0800') | phone.startswith('800') :
                 return None
             if phone.startswith('44') and len(phone) == 12:
@@ -280,7 +306,7 @@ class Unbiased_gb(BaseSite):
             return address__
             
             
-            
+    
             
             
             

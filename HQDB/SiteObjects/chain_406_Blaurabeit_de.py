@@ -11,6 +11,7 @@ import requests
 import time
 from lxml import html
 from audioop import add
+from Common.Validation import CityZipcode
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -33,7 +34,7 @@ class Blaurabeit_de(BaseSite):
     outFileSV = ''
     linkIn=[]
     removeName =[':)',':','=))','=']
-    removeDes= ['Mobil','Email','Tel:']
+    removeDes= ['Mobil','Email','Tel:','Kontaktdaten:','Adresse:','E-Mail:','Email Adresse:']
     bpfArray =['//div[@class="row row_b row_container clearfix"]',
                '//div[@class="row row_f row_container clearfix"]',
                '//div[@class="row row_p row_container clearfix"]',
@@ -46,12 +47,20 @@ class Blaurabeit_de(BaseSite):
     
     def doWork(self):
         self.phoneCodeList = Util.getPhoneCodeList()
+        #print self.processAddress_('1936 Neukirch OT Gottschdorf')      
         self.__getListVenues()
+        
     def __getListVenues(self):
+            
+            
+            setvenuesperCate= 85
+            
             with open('Data/Category_chain_406.txt') as f:
                 line_ = f.read().splitlines()
             index =0
             for line in line_:
+                countPerCate =0 
+                
                 cateArr = line.split('\t')
                 cate = cateArr[0]
                 cateLink = cateArr[1]
@@ -59,19 +68,40 @@ class Blaurabeit_de(BaseSite):
                 if subcateXml!=None:
                     subcates =  subcateXml.xpath('./ul/li/a')
                     for subcate in subcates:
+                        
+                        
+                        if countPerCate == setvenuesperCate:
+                            break
+                        
+                        
                         catename =  ''.join(subcate.itertext()).strip()
                         urlcate = subcate.get('href')
                         if urlcate.startswith('/'):
                             urlcate =  self.__url__+ urlcate
                         pages = 0
                         while True :
+                            
+                            
+                            if countPerCate == setvenuesperCate:
+                                break
+                            
                             param= '?radius=21&view=list&interval='+str(pages)
                             xmlDoc = Util.getRequestsXML(urlcate+param,'//div[@class="br_results br_results_dir"]')
                             if len(xmlDoc.xpath('./div[@class="br_results br_results_dir"]'))<=0:
                                 break
                             for xpath_ in self.bpfArray:
+                                
+                                
+                                if countPerCate == setvenuesperCate :
+                                    break
+                                
                                 elementIems = xmlDoc.xpath(xpath_)
                                 for ele in elementIems:
+                                    
+                                    
+                                    if countPerCate == setvenuesperCate:
+                                        break
+                                    
                                     type_hqdb = ele.find('.//div[@class="col-inner"]/div')
                                     if xpath_ =='//div[@class="row row_p row_container clearfix"]':
                                         hqdb_type ="featured"
@@ -82,24 +112,21 @@ class Blaurabeit_de(BaseSite):
                                     if linkItems.startswith('/'):
                                         linkItems= self.__url__+linkItems
                                         print 'Scrapping: '+ linkItems
+                                        time.sleep(1)
                                         ven =    self.__VenueParser(hqdb_type, linkItems,catename,cate)
                                         if ven!=None:
                                             print 'Writing index: '+str(index)
                                             ven.writeToFile(self.folder, index, self.validateFilename(ven.name), False)
                                             index+=1
-                                            
-                                
+                                            countPerCate+=1       
                             pages+=1
+  
     def __VenueParser(self,hqdb_type, linkItems,subcate,cate):    
-            #linkItems ='https://www.blauarbeit.de/p/babysitter-langenpreising/yvonne-daschner/171964.htm'
+            #linkItems ='https://www.blauarbeit.de/p/buchhaltung/berlin/cornelia_wegner/230862.htm'
             existing=[x for x in self.linkIn if linkItems in x]
             if len(existing)>0:
                 print 'This venue exist in list'
                 return None
-            
-            
-            
-            
             self.linkIn.append(linkItems)
             
             
@@ -112,22 +139,25 @@ class Blaurabeit_de(BaseSite):
             xmlVen = xmlPages.xpath('//div[@class="page_move"]')
             if len(xmlVen)==0:
                 return None
-            name = xmlVen[0].find('.//h2')
-            if name ==None:
-                return None
-            name = name.text.strip()
+            #print ET.dump(xmlVen[0])
+            name = xmlVen[0].xpath('.//h2')
+            if len(name) <=0:
+                name =''
+            else:
+                name = name[0].text.strip()
             noneValues ={'ZERO','NULL'}
             if name.upper() in noneValues:
                 return None
             ven = Venue()
             nameFromUrl = self.getNamefromUrl(linkItems)
+            ven.name =  nameFromUrl
             ven.hqdb_featured_ad_type = hqdb_type
-            ven.name =name
+            #ven.name =name
             ven.scrape_page = linkItems
             ven.subcategory = subcate
             ven.category= cate
             address_= ''
-            ven.formatted_address=''
+            #ven.formatted_address=''
             img_link= []
             divInfo = xmlVen[0].find('.//div[@class="content_wrapper content_wrapper_main clearfix"]/div')
             if divInfo!=None:
@@ -142,23 +172,50 @@ class Blaurabeit_de(BaseSite):
                         if len(td)<2:
                             continue
                         key_ = ''.join(td[0].itertext()).strip()
-                        values_ = ' '.join(td[1].itertext()).strip().replace('keine Angabe','')
+                        values_ = ' '.join(td[1].itertext()).strip().replace('keine Angabe','').replace('NULL','').replace('null','')
                         if key_ =='Ansprechpartner:':
                             if values_!=None and len(values_)>2:
                                 #values_ =''
-                                ven.name_of_contact = nameFromUrl +' '+ values_
+                                ven.name_of_contact = values_
+                                ven.name +=', '+ ven.name_of_contact
                             
                         if key_ =='Addresse:':
                             address_ =  values_
-                            #(ven.street,ven.city,ven.zipcode) = self.processAddress(address_.replace('\n', '||'))
-                            ven.formatted_address = address_
-                            
+                            (ven.street,ven.city,ven.zipcode) = self.processAddress(address_)
+                            #ven.formatted_address = address_
+                            if ven.city!=None:
+                                checkCity = ven.city.split()
+                                if len(checkCity)>0:
+                                    if checkCity[0].isdigit():
+                                        if len(checkCity[0])==5:
+                                            if ven.street!=None:
+                                                ven.street+=' '+ ven.zipcode
+                                            ven.zipcode = checkCity[0]
+                                            ven.city = ven.city.replace(ven.zipcode,'')
+                                        else:
+                                            ven.city = None
+                                            ven.street = None
+                                            ven.zipcode= None
+                                            ven.formatted_address = ' '.join(checkCity)
+                                
+                                
+                                
+                            if ven.zipcode!=None:
+                                if len(ven.zipcode)==5:
+                                    ven.zipcode = ven.zipcode
+                                else:
+                                    ven.zipcode = None
                         if key_ =='Homepage:':
                             a_ = td[1].find('./a')
                             if a_ !=None:
                                 ven.business_website = a_.get('href')
                         if key_ =='Tel:':
-                            ven.office_number = values_.replace('/', '').replace(' ', '')
+                            values_ = values_.replace('/', '').replace(' ', '').replace('Tel', '')
+                            if values_.startswith('01')| values_.startswith('+0041')| values_.startswith('0041'):
+                                ven.mobile_number = self.validatePhone(values_)
+                            else:
+                                ven.office_number = self.validatePhone(values_)
+                            
                     img_ = leftInfo.find('./div/div[@class="profile_top_right"]/img')
                     if img_!=None:
                         img_ =img_.get('src')
@@ -186,19 +243,49 @@ class Blaurabeit_de(BaseSite):
                                 core_ =None
                             ven.hqdb_review_score = core_
                     script_ = xmlPages.xpath('./head/script')
+                    if address_.strip()=='' and ven.office_number==None and ven.office_number2 ==None and ven.mobile_number ==None and ven.mobile_number2 ==None:
+                        return None
                     
-                    (ven.latitude,ven.longitude)  = self.getLatlng(ven.formatted_address,'DE') #script_
-                    if ven.latitude== None and ven.longitude == None:
-                        zipFrom = self.findZipcode(ven.formatted_address)
-                        if zipFrom!=None:
-                            (ven.latitude,ven.longitude) = self.getLatlng(zipFrom, 'DE')
-                            if ven.latitude ==None and ven.longitude==None:
-                                Util.log.running_logger.info(address+' : cannot get GEO code')
+                    streetTemp = ven.street
+                    cityTemp =ven.city
+                    zipcodeTemp =ven.zipcode
+                    
+                    if streetTemp ==None:
+                        streetTemp =''
+                    if ven.city ==None:
+                        cityTemp = ''
+                    if ven.zipcode ==None:
+                        zipcodeTemp =''
+                    address_ = streetTemp+', '+cityTemp+', '+zipcodeTemp
+                    address_ = address_.strip().replace(', ,', ',').replace(',,', ',')
+                    if address_.startswith(','):
+                        address_ =address_[1:len(address_)]
+                    if address_.endswith(','):
+                        address_ = address_[0:len(address_)-1]
+                        
+                    if ven.formatted_address!=None:
+                        address_ = ven.formatted_address
+                    
+                    if len(address_.strip())>5:
+                        (ven.latitude,ven.longitude)  = self.getLatlng(address_,'DE') #script_
+                    
+                    
+                        if ven.latitude== None and ven.longitude == None:
+                            zipFrom = self.findZipcode(address_)
+                            if zipFrom!=None:
+                                (ven.latitude,ven.longitude) = self.getLatlng(zipFrom, 'DE')
+                                if ven.latitude ==None and ven.longitude==None:
+                                    Util.log.running_logger.info(address_+' : cannot get GEO code')
+                                else:
+                                    Util.log.running_logger.info(address_+' : cannot get GEO code')
+                            else:
+                                Util.log.running_logger.info(address_+' : cannot get GEO code')
                     redirecPhotos= rightInfo.find('./nav/div/ul/li[@class="tabOff tab_foto"]/a')
                     if redirecPhotos!=None:
                         linkPhotos =  redirecPhotos.get('href')
                         if linkPhotos.startswith('/'):
                             linkPhotos = self.__url__+ linkPhotos
+                        time.sleep(1)
                         xpathPhotos =  Util.getRequestsXML(linkPhotos, '//div[@class="portfolio thumbs"]/a')
                         listImg = xpathPhotos.xpath('./a')
                         for __img in listImg:
@@ -206,6 +293,9 @@ class Blaurabeit_de(BaseSite):
                     
                     
                     desElement= rightInfo.find('./div/div[@id="cont_about"]')
+                    
+                    
+                    '''
                     pTag = desElement.xpath('//div[@class="overview"]/p')
                     des = ''
                     for desE in pTag :
@@ -226,6 +316,20 @@ class Blaurabeit_de(BaseSite):
                         if desElement.find('.//div[@class="overview"]')!=None:
                             des =  desElement.find('.//div[@class="overview"]').text
                     ven.description = self.validateDes(des)
+                    '''
+                    des =''
+                    divTag = desElement.xpath('//div[@class="overview"]')
+                    for divDes in divTag:
+                        des+= ' '.join(divDes.itertext())
+                    ven.description =  self.validateDes(des)
+                    
+                    
+                    if ven.street!=None:
+                        if ven.street.find('@')>=0:
+                            ven.street =None
+                    
+                    
+                    
                     certi = rightInfo.find('.//div/div[@id="cont_certs"]')
                     tablecerti =  certi.find('./table')
                     if tablecerti!=None:
@@ -242,7 +346,7 @@ class Blaurabeit_de(BaseSite):
         #for i in range(0, len(arr_)):
             #if arr_[i]=='p':
                 #return arr_[i+1].replace('-',' ').replace('_',' ').strip()
-        return arr_[4].replace('-',' ').replace('_',' ').strip()
+        return arr_[4].replace('-',' ').replace('_',' ').strip()+''
     
     def __ServicesParser(self,url,xmlServices):        
         ''
@@ -272,21 +376,93 @@ class Blaurabeit_de(BaseSite):
             return (None,None,None)
         address = address.replace('>','').split()
         for i in range(0,len(address)):
-            if address[i].isdigit() and len(address[i])==5:
+            if address[i].isdigit() and len(address[i])>=4:
                 zipcode = address[i]
+                #if len(zipcode)==5:
+                #    zipcode =zipcode
+                #else:
+                #    zipcode =None
                 city = ' '.join(address[i+1:len(address)])
+                if city!=None:
+                    if city.find(',')>=0:
+                        city =city.split(',')
+                        city = city[len(city)-1]
+                    if city.find('+')>=0:
+                        city = city.split('+')[0]
                 street = ' '.join(address[0:i])
-                return (street,city,zipcode)
-        return (None, ''.join(address), None)
+                if street!=None:
+                    if street.find(':')>=0:
+                        street = street[street.find(':')+1:len(street)-1]
+                        if street.find('@')>=0:
+                            street=None
+                return (street,self.getCity(city),zipcode)
+        return (None, self.getCity(''.join(address)), None)
+    
+    def processAddress_(self,address):
+        if address==None:
+            return (None,None,None)
+        address= address.split()
+        index =0
+        index_ =0
+        for i in range(0,len(address)):
+            tempZip = address[i]
+            if tempZip.isdigit() and len(tempZip)>=4:
+                if len(tempZip) ==5:
+                    zipcode =tempZip
+                    index= i
+                else:
+                    index_=i
+                    for k in range(i+1,len(address)):
+                        if address[k].isdigit() and len(address[k])==5:
+                            zipcode = address[k]
+                            index = k
+        if index==0 and index_ ==0:
+            return (None,' '.join(address),None)
+        else:
+            if index==0 and  index_>0:
+                city = ' '.join(address[index_+1:len(address)])
+                zipcode =None
+                street = ' '.join(address[0:index_+1])
+            else:
+                if index >0:
+                    zipcode = address[index]
+                    city = ' '.join(address[index+1:len(address)])
+                    street = ' '.join(address[0:index])
+                    
+            if city!=None:
+                if city.find(',')>=0:
+                    city = city.split(',')
+                    city = city[len(city)-1]
+                if city.find('+')>=0:
+                    city = city.split('+')[0]
+                if street!=None:
+                    if street.find(':')>=0:
+                        street = street[street.find(':')+1:len(street)-1]
+                    if street.find('@')>=0:
+                        street = None
+            return (street,city,zipcode)
+    
+    
+    
+    
     def validateDes(self,des):
         for char in self.removeDes:
             if des.find(char)>=0:
                 des = des[0:des.find(char)]
-        return des.replace('�','')
+        try:        
+            findchar = self.findAllPositionCharinString('[if', des)
+        except Exception,ex:
+            print ex
+        for i in range(0,len(findchar)):
+            if des.find('[if')>=0:
+                remove_ = des[des.find('[if'):des.find('endif]')+len('endif]')]
+                des = des.replace(remove_,'')
+        return des.replace('�','').replace('-',' ').replace('..',' ').replace('__','')
     def getLatlng(self,address,countr):
         if address.strip()=='':
             #return (None,None)
             address = 'null'
+            return (None,None)
         try:
             jsonLatlng = Util.getGEOCode(address, countr)
             if jsonLatlng !=None:
@@ -319,6 +495,41 @@ class Blaurabeit_de(BaseSite):
                 if len(add)==5 and add.isdigit():
                     return add
         return None
+    def findAllPositionCharinString(self,char,String):
+        return [i for i in range(len(String)) if String.startswith(char, i)]
+    def validatePhone(self,phone):
+        if phone ==None:
+            return None
+        else:
+            if phone.startswith('+004')| phone.startswith('004'):
+                if len(phone)<17 and len(phone)>12:
+                    if phone.startswith('+'):
+                        return '+'+phone[3:len(phone)]
+                    else:
+                        return '+'+ phone[2:len(phone)]
+                else:
+                    return None
+        
+            else:
+                
+                if len(phone)>=10 and len(phone)<13:
+                    return phone
+                else:
+                    return None
     
-    
+    def getCity(self,city):
+        if city!=None:
+            if city.find(',')>=0:
+                city =city.split(',')
+                city = city[len(city)-1]
+            if city.find('+')>=0:
+                city = city.split('+')[0]
+            if city.find('/')>=0:
+                city = city.split('/')
+                city =city[len(city)-1]
+            return city
+        else:
+            return None
+        
+                
     

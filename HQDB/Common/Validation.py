@@ -8,12 +8,12 @@ from urllib import urlencode
 import geocoder
 from validate_email import validate_email
 import re
-#import validators
+from mongoengine.fields import URLField, EmailField
 
 
 with open('Data/Countries.csv', 'r') as f:
     reader = csv.reader(f)
-    lstCountries = list(reader) 
+    lstCountries = list(reader)     
 
 def Country(country_id):
     if country_id == None:
@@ -156,12 +156,12 @@ def ValidateGeoCode(fulladdress,country,lat,lng,scrape_page=None):
             dotIndex = latLo.find('.') + 3
             for c in range(min(dotIndex,len(lat))):
                 if lat[c] != latLo[c]:
-                    Util.log.coordinate_logger.warning(scrape_page + ': invalid GEO code (' + lat + ',' + lng + ')')
+                    Util.log.coordinate_logger.error(scrape_page + ': invalid GEO code (' + lat + ',' + lng + ')')
                     return False            
             dotIndex = lngLo.find('.') + 3
             for c in range(min(dotIndex,len(lng))):
                 if lng[c] != lngLo[c]:
-                    Util.log.coordinate_logger.warning(scrape_page + ': invalid GEO code (' + lat + ',' + lng + ')')
+                    Util.log.coordinate_logger.error(scrape_page + ': invalid GEO code (' + lat + ',' + lng + ')')
                     return False
         else:
             Util.log.coordinate_logger.warning(fulladdress + ',' + country + ': cannot get GEO code')            
@@ -173,22 +173,6 @@ def CheckURL(url):
     elif Util.Navigate(url) != 404 :
         return url
     return ''
-
-def is_valid_url(url):
-    regex = re.compile(r'^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:%/?#[\]@!\$&\(\)\*\+,;=.]+$', re.IGNORECASE)
-    return url is not None and regex.search(url)
-
-def RevalidURL(url):
-    if url != None:        
-        if url == None:
-            return None
-        if isinstance(url,list):
-            url = [x.replace(' ','%20') for x in url if is_valid_url(x) != None]
-        elif is_valid_url(url) != None:
-            return url
-        else:
-            return None
-    return url
 
 def RevalidName(name,isGermany=False):
     invalidchar = ['\\','/','*','?','"','<','>','|',':']
@@ -214,16 +198,18 @@ def is_valid_email(email):
 
 def RevalidEmail(email):
     try:
-        if email == None or email == '':
-            return None
-        is_valid = is_valid_email(email)#validate_email(email,check_mx=True,smtp_timeout=20)
-        if is_valid == False:
-            Util.log.running_logger.warning(email + " invalid email")
-            return None
-        else:
-            return email
+        mongo_validator = EmailField()
+        mongo_validator.validate(email)
+        return True
     except:
-        Util.log.running_logger.info(email + ': cannot Validate')
-        return email
+        return False
+
+def RevalidURL(url):
+    try:
+        mongo_validator = URLField()
+        mongo_validator.validate(url)
+        return True
+    except:
+        return False
     
     

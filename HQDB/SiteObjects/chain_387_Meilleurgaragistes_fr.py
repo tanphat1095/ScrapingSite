@@ -32,7 +32,7 @@ class Meilleurgaragistes_fr(BaseSite):
     outFileSV = ''
     link_venues = []
     phoneRemove =['08714856510','055094212','0549569']
-    regex_= ['(BP[\s][\d]{5})','(BP[\d]{5})','(CS[\s][\d]{5})','(CS[\d]{5})','([\d]{4,5})']
+    regex_= ['(BP[\s][\d]{5})','(BP[\d]{5})','(BP[\s][\d]{3})','(CS[\s][\d]{5})','(CS[\d]{5})','([\d]{4,20})']
     
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
@@ -78,8 +78,10 @@ class Meilleurgaragistes_fr(BaseSite):
             
         
 
-    def __VenueParser(self, link):        
+    def __VenueParser(self, link): 
+        #link ='https://www.meilleur-garagiste.com/annuaire/sarl-carenove.461128.html'       
         print 'Scrapping: ' + link
+        
         
         existing=[x for x in self.link_venues if link in x]
         if len(existing)>0:
@@ -184,7 +186,7 @@ class Meilleurgaragistes_fr(BaseSite):
         return xml
     def getLatlng(self,address,countr):
         try:
-            jsonLatlng = Util.autoChange(address, countr)
+            jsonLatlng = Util.getGEOCode(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')

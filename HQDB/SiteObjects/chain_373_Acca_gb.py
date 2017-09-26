@@ -219,17 +219,17 @@ class Acca_gb(BaseSite):
                             phone_1 = phone_[0]
                             phone_2 = phone_[1]
                             phone_2 = phone_1[0:len(phone_1)-len(phone_2)]+ phone_2
-                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447'):
+                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447')| phone.startswith('447'):
                                 ven.mobile_number = self.valiDatePhone(phone_1)
                             else:
                                 ven.office_number = self.valiDatePhone(phone_1)
-                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447'):
+                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447')| phone.startswith('447'):
                                 ven.mobile_number2 = self.valiDatePhone(phone_2)
                             else:
                                 ven.office_number2 = self.valiDatePhone(phone_2)
                     else:
 
-                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447'):
+                            if phone.startswith('07') | phone.startswith('7')| phone.startswith('+447')| phone.startswith('447'):
                                 ven.mobile_number = self.valiDatePhone(phone)
                             else:
                                 ven.office_number = self.valiDatePhone(phone)
