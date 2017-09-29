@@ -8,12 +8,17 @@ import re
 import json
 import time
 import requests
+import phonenumbers
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from time import sleep
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class Unbiased_gb(BaseSite):
     """description of class"""
@@ -37,7 +42,7 @@ class Unbiased_gb(BaseSite):
     list_url =[]
     vens=[]
     serv=[]
-    listPhoneremove =['01615069963','01615069598']
+    listPhoneremove =['01615069963','01615069598','01615069896']
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
         self._output = output
@@ -45,12 +50,23 @@ class Unbiased_gb(BaseSite):
     def doWork(self):
   
         self.phoneCodeList = Util.getPhoneCodeList()
+        '''ex_ = re.search('([Gg][Ii][Rr]0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})',
+                             'Drovers Lodge, Coombe Lane, Kent, Tenterden,',
+                             flags=0)
+        print ex_.group(0)'''
+        
+        
+        
+        '''self.listPhoneremove.append('+441213216060')
+        for phone in self.listPhoneremove:
+            print self.validatePhone__(phone, 'gb')'''
+        
+        
         
         self.__getListVenues()    
-        for items in range(0,len(self.venues)):
-            ven = self.venues[items]
-            if ven!=None:
-                ven.writeToFile(self.folder,items,False)
+        
+
+        
     def __getListVenues(self):
         print "Getting list of Venues"
         files_ = open('Data/EngCity.txt','r')
@@ -137,12 +153,31 @@ class Unbiased_gb(BaseSite):
          xmlRequest = Util.getRequestsXML(url,'//div[@class="container-fluid"]')
          if xmlRequest !=None:
             stringAddress = xmlRequest.find('.//span[@class="profile-meta__address"]').text.replace(',,',',')
+            
+            stringAddress ='1st and 2nd Floor Offices, 446 - 452 High street, Kingswinford, West Midlands,'
+            
             ven.formatted_address = self.removeNameFromAdd(ven.name.strip(), stringAddress).replace('PO BOX','').replace('PO Box','').replace('Po Box','')
+            zipArr =  stringAddress.split(',')
+            ven.zipcode =  zipArr[len(zipArr)-1]
+            ex_ = re.search('([Gg][Ii][Rr]0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})',
+                             stringAddress,
+                             flags=0)
             
-            
-            
-            
-            
+            if ex_!=None:
+                zip_c = ex_.group(0)
+                #ven.zipcode = zip_c
+                #ven.formatted_address = ven.formatted_address.replace(ven.zipcode,'').strip()
+                if ven.zipcode!= zip_c:
+                    poZip_c = stringAddress.find(zip_c)
+                    poZipcode = stringAddress.find(ven.zipcode)
+                    if len(ven.zipcode.strip()) >1:
+                        if poZip_c >poZipcode:
+                            ven.zipcode = zip_c
+            if ex_ ==None:
+                if ven.zipcode!=None:
+                    ven.zipcode = None           
+            if ven.formatted_address.endswith(','):
+                ven.formatted_address = ven.formatted_address[0:len(ven.formatted_address)-2]
             phoneLabel = xmlRequest.xpath('.//span[@class="phone-label"]/parent::a')
          
             if len(phoneLabel)>0:
@@ -272,7 +307,7 @@ class Unbiased_gb(BaseSite):
                 if phone.startswith('0'):
                     return None
                 else:
-                    return phone
+                    return self.validatePhone__(phone, 'gb')
         else:
             phone = None
         return phone
@@ -305,8 +340,18 @@ class Unbiased_gb(BaseSite):
         else:
             return address__
             
-            
-    
+    def validatePhone__(self,phone,country):        
+        try:
+            parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
+        except phonenumbers.phonenumberutil.NumberParseException as error: 
+                print phone +' can not parse'
+                return None
+        if not phonenumbers.is_valid_number(parsed_phone):
+            print phone +': not number'
+            return None
+        else:
+            return phone
+
             
             
             

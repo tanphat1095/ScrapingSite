@@ -6,6 +6,7 @@ from Objects_HQDB import Service
 from Objects_HQDB import Venue
 import re
 import time
+import phonenumbers
 from selenium import webdriver
 
 import urllib3
@@ -43,6 +44,10 @@ class Acca_gb(BaseSite):
     
     def doWork(self):
         self.phoneCodeList = Util.getPhoneCodeList()
+        
+        
+        
+        
         self.__getListVenues()
     def __getListVenues(self):
         print "Getting list of Venues"
@@ -262,8 +267,9 @@ class Acca_gb(BaseSite):
             else :
                 ser_services = list_services[ser_i]
                 ser_i+=1
-            ser.service = ser_services.strip()     
-            sers.append(ser)
+            ser.service = ser_services.strip()
+            if len(ser.service)>1:
+                sers.append(ser)
         return sers
     def formatDes(self,stringServices):        
         
@@ -343,7 +349,7 @@ class Acca_gb(BaseSite):
                 if result_.startswith('0800'):
                     result = None
             
-            return result_
+            return self.validatePhone__(result_, 'gb')
     def validateWebsite(self,website_):
         if website_!=None:
             if website_.find('@') >=0:
@@ -353,10 +359,10 @@ class Acca_gb(BaseSite):
         else:
             return None
     def Services_(self,servicesstr):
-                         list_services =   servicesstr.split(',')
-                         sers =[]
-                         ser_i=0
-                         for iser in range(0,len(list_services)):
+                        list_services =   servicesstr.split(',')
+                        sers =[]
+                        ser_i=0
+                        for iser in range(0,len(list_services)):
                             if ser_i >=len(list_services):
                                 break
                             ser = Service()
@@ -377,7 +383,7 @@ class Acca_gb(BaseSite):
                                 ser_i+=1
                             ser.service = ser_services  
                             sers.append(ser) 
-                         return sers
+                        return sers
     def validateStreet(self, street):
         if street==None:
             return None
@@ -389,5 +395,16 @@ class Acca_gb(BaseSite):
         return street
     def duplicatePhone(self, phone_1,phone_2):
         if phone_1.strip() == phone_2.strip():
-            return (phone_1,None)
-        return (phone_1,phone_2)
+            return (self.validatePhone__(phone_1, 'gb'),None)
+        return (self.validatePhone__(phone_1, 'gb'),self.validatePhone__(phone_2, 'gb'))
+    def validatePhone__(self,phone,country):        
+        try:
+            parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
+        except phonenumbers.phonenumberutil.NumberParseException as error: 
+                print phone +' can not parse'
+                return None
+        if not phonenumbers.is_valid_number(parsed_phone):
+            print phone +': not number'
+            return None
+        else:
+            return phone

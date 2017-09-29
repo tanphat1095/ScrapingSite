@@ -23,6 +23,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
     venues = []
     outFileVN = ''
     outFileSV = ''
+    venuesList =[]
     removeChar= ['1 and 2 Hour','hour & haft and two hour lessons .','10% discount when paying for 10 lessons','1 and 2 hour','1 or 2 hour lessons','One Hour','2hrs','5 hours','1hr30 min','2hr','3 HOURS','6 hours','From','per hour','ONE HOUR','per one hour','First hour','first 5 hours','First 5 hours','(subject to terms and conditions 1x2x2 hours)','one hour','60 minute','one or two hour','1hr','1.5hr','1 hour']
     __city__ = []
     def __init__(self, output="JSON_Results", isWriteList=None):
@@ -214,7 +215,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
                     self.__city__.append(link)
     def getLatlng(self,address,countr):
         try:
-            jsonLatlng = Util.autoChange(address, countr)
+            jsonLatlng = Util.getGEOCode(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')

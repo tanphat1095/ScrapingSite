@@ -212,7 +212,7 @@ class Architecturalindex_gb(BaseSite):
     
     def getLatlng(self,address,countr):
         try:
-            jsonLatlng = Util.autoChange(address, countr)
+            jsonLatlng = Util.getGEOCode(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')

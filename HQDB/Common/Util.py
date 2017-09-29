@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import requests
 import codecs
 import io
+import re
 from lxml import etree as ET
 from lxml import html
 from urllib import urlencode
@@ -15,6 +16,7 @@ import json
 import datetime
 from collections import OrderedDict
 from Common.Logging import Log
+from Common import StatusCode
 import csv
 import urllib2
 import urllib
@@ -25,6 +27,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
 log = Log
+
 
 #OpenHours Days Of Week
 _24H_UK_DaysOfWeek = "Monday-Sunday: 00:00-24:00"
@@ -37,6 +40,7 @@ _24H_ES_DaysOfWeek = "Lunes-Domingo: 00:00-24:00"
 
 _24H_PL_DaysOfWeek = "Poniedziałek-Niedziela: 00:00-24:00"
 _24H_CZ_DaysOfWeek = "Pondĕlí-Nedĕle: 00:00-24:00"
+
 geocodeAPI_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
                   'AIzaSyC6xwNdTRA593eUQ58s1WiSrFuJqj5_58Y',
                   'AIzaSyCqsFHXIZ5okyk7wgZkk09zTABy0mt0qMg',
@@ -46,7 +50,8 @@ geocodeAPI_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
                   'AIzaSyDntti4ZJI6VDlDliPo7imO-8FZiNppN-w',  
                   'AIzaSyDEjA8msKq-WlkOfEFBElctj3QBB4ASPrQ',
                   'AIzaSyB9--gWXJs1eaFc7x4ibapYMsI9lgySENs',
-                  'AIzaSyCr8HcTZ40PklYd_7AdMKu4RdlzRCXeMkQ']
+                  'AIzaSyCr8HcTZ40PklYd_7AdMKu4RdlzRCXeMkQ',
+				  'AIzaSyCDtJ0-wUO5YAOtYr37IfekH4YV44KCN_c']
 
 
 
@@ -214,6 +219,10 @@ def getRequestsXML(url,xpath,spec=False,encoding=True):
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
         }
         response = requests.request("GET", url, headers=headers,timeout=(60,60),verify=False)        
+        if response.status_code >= 400 and response.status_code <= 599:
+            error = StatusCode.__getDetail(response.status_code)     
+            log.running_logger.error('[Get Request]: {0}: {1}'.format(url,error))
+            return None        
         if encoding == False:
             htmlDocument = html.fromstring(response.content)
         else:
@@ -227,7 +236,7 @@ def getRequestsXML(url,xpath,spec=False,encoding=True):
                 root.append(xml)
             return root
     except Exception,ex:
-        print ex
+        log.running_logger.error('[Get Request]: {0}: {1}'.format(url,ex.message))
         return None
 
 def getSeleniumXML(url,xpath,xPathelemenClick=None):
@@ -275,7 +284,6 @@ def CheckExistingFile(folder, filename):
     return os.path.isfile("/".join([folder,filename]))
 
 def getGEOCode(fulladdress,country):
-    #statusArr =['OVER_QUERY_LIMIT','REQUEST_DENIED']
     try:
         status = ''
         index = 0
@@ -294,16 +302,13 @@ def getGEOCode(fulladdress,country):
                 }
             response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
             json_location = response.json()
-            
             status = json_location.get('status')
-            if status!='OVER_QUERY_LIMIT' and status!='REQUEST_DENIED':
-                break
-            else:
-                print geocodeAPI_key[index]+' : '+ status
+            if status == "OVER_QUERY_LIMIT":
                 index+=1
+            else:
+                break                        
         return json_location
-    except Exception,ex:
-        
+    except Exception,ex:        
         return None
 
 def subtractTime(t1,t2):        
@@ -425,4 +430,12 @@ def ExportCSV(folder,filename):
     except Exception,ex:
         print ex.message
         raise
+
+def SubString(input,length):
+    return "".join(input[0,length],'...')
+
+def GetPhone(input):
+    pattern = re.compile(r'')
+    
+
 
