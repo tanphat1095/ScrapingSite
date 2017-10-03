@@ -286,17 +286,12 @@ def CheckExistingFile(folder, filename):
 
 def getGEOCode(fulladdress,country):
     try:
-        status = ''
+        status = 'OVER_QUERY_LIMIT'
         index = 0
-        index_run = []
+        index_run = range(0,len(geocodeAPI_key))
         json_location = json.loads('{"status": null,"results":null}')        
-        while status == 'OVER_QUERY_LIMIT' or status == '':            
-            index_run.append(index)
-            while index in index_run:
-                index = random.randint(0,len(geocodeAPI_key) - 1)
-                if len(index_run) == len(geocodeAPI_key):
-                    log.coordinate_logger.warning('[API Key]: OVER_QUERY_LIMIT')
-                    return json.loads('{"status": null,"results":null}')                            
+        while len(index_run) > 0 and status == 'OVER_QUERY_LIMIT':                                    
+            index = index_run[random.randint(0,len(index_run) - 1)]
             APIKey = geocodeAPI_key[index]
             url = "https://maps.googleapis.com/maps/api/geocode/json"
             querystring = {
@@ -311,10 +306,14 @@ def getGEOCode(fulladdress,country):
             response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
             json_location = response.json()
             status = json_location.get('status')
+            if status == 'OVER_QUERY_LIMIT':
+                index_run.remove(index)
+        if len(index_run) <= 0:
+            log.coordinate_logger.warning('[API Key]: OVER_QUERY_LIMIT')
+            return json.loads('{"status": "OVER_QUERY_LIMIT","results":null}')                            
         return json_location
     except Exception,ex:        
-        return json.loads('{"status": null,"results":null}')
-
+        return json.loads('{"status": ' + ex.message + ',"results":null}')
 
 def subtractTime(t1,t2):        
         # caveat emptor - assumes t1 & t2 are python times, on the same day and
