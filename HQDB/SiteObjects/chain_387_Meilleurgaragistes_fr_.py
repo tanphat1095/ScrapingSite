@@ -13,9 +13,12 @@ import re
 import json
 from array import array
 import urllib3
+import requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+import time
+import phonenumbers
 class Meilleurgaragistes_fr(BaseSite):
     phoneCodeList = None
     __url__ = 'https://www.meilleur-garagiste.com'
@@ -38,20 +41,14 @@ class Meilleurgaragistes_fr(BaseSite):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
         self._output = output
         self._isWriteList = isWriteList
-    
-    
     def doWork(self):
      
         '''
         Code Here
         '''
         #Write Files
-        
-        
         self.phoneCodeList = Util.getPhoneCodeList()
         self.__getListVenues()
-        
-    
     def __getListVenues(self):
         print "Getting list of Venues"
         index = 1
@@ -67,35 +64,47 @@ class Meilleurgaragistes_fr(BaseSite):
                     link_ = self.__url__+ items.get('href')
                     ven = self.__VenueParser(link_)
                     if ven!=None:
+                        if ven.zipcode !=None  and len(ven.zipcode)>0 and ven.zipcode.isdigit() :
+                            zip_ = int(ven.zipcode)
+                            if zip_ <1000 :
+                                Util.log.running_logger.error(link_+': Oversea of Fr - Zipcode:'+ ven.zipcode)
+                                continue
+                            if zip_ >95978 :
+                                Util.log.running_logger.error(link_+': Oversea of Fr - Zipcode:'+ ven.zipcode)
+                                continue
+                            if len(ven.zipcode)==4:
+                                ven.zipcode = '0'+ ven.zipcode
+                        else:
+                                continue
                         print 'Writing files: '+ str(index_)
                         ven.writeToFile(self.folder, index_, ven.name, False)
                         print str(len(self.services))+ ' services'
-                       
                         index_+=1
-                    
+                        #time.sleep(2)
             else:
                 break
-            
-        
-
     def __VenueParser(self, link): 
-        #link ='https://www.meilleur-garagiste.com/annuaire/sarl-carenove.461128.html'       
+        #link ='https://www.meilleur-garagiste.com/annuaire/garage-la-couronne.464207.html'       
         print 'Scrapping: ' + link
-        
-        
         existing=[x for x in self.link_venues if link in x]
         if len(existing)>0:
             print 'Len existing : '+ str(len(existing))
             return None
-        
-        
         xmlBody = Util.getRequestsXML(link,'//div[@id="fiche-artisan"]')
         if xmlBody !=None and len(xmlBody)>0:
             ven = Venue()
-            name_ = xmlBody.find('.//h1')
-            if name_ !=None :
-                name_ = name_.text
-                ven.name = name_
+            name_ = xmlBody.xpath('.//h1/parent::div')
+            if len(name_)>0:
+                if name_!=None:
+                    name_h1 = name_[0].find('./h1')
+                    name_h2 = name_[0].find('.//h2')
+                    if name_h2!=None:
+                        ven.name = name_h2.text
+                    else:
+                        ven.name = name_h1.text
+           
+            else:
+                return None           
             xmldiv = xmlBody.find('.//div[@class="row nomargin"]/div')
             if xmldiv ==None: 
                 return None
@@ -111,22 +120,18 @@ class Meilleurgaragistes_fr(BaseSite):
                 if i_.get('class')=='postal-code':
                     ven.zipcode = i_.text
                     ven.zipcode = self.validateZipcode(ven.zipcode)
-                    if ven.zipcode !=None  and len(ven.zipcode)>0 and ven.zipcode.isdigit() :
-                        zip_ = int(ven.zipcode)
-                        if zip_ <1000 | zip_>95978:
-                            ven.zipcode = None
                 if i_.get('class')=='locality':
                     ven.city = i_.text
             a = xmlBody.find('.//a[@class="col m12 s4 tel waves-effect waves-light btn center btn-fix bleu"]')
             if a!=None:
                 phone = a.get('href').replace('tel:','').replace(' ','')
                 if phone.startswith('07') | phone.startswith('06'):
-                    ven.mobile_number = self.validatePhone(phone)
+                    ven.mobile_number = self.validatePhone__(phone, 'FR')
                 else:
-                    ven.office_number =  self.validatePhone(phone)
+                    ven.office_number =  self.validatePhone__(phone, 'FR')
             logo =  xmlBody.find('.//div[@class="center-align"]/img')
             if logo!=None:
-                ven.venue_images = self.__url__+ logo.get('src')
+                ven.img_link= [self.__url__+ logo.get('src')]
             ven.scrape_page = link
             ven.pricelist_link = [link]
             listServices = xmlBody.xpath('//li/div[@class="collapsible-body"]/div/a')
@@ -137,7 +142,6 @@ class Meilleurgaragistes_fr(BaseSite):
                 sers.append(servic)
                 self.services.append(servic)
             ven.services = sers
-            
             if ven.city!=None and ven.zipcode !=None:
                 if ven.street !=None and len(ven.street)>0:
                     add_= ven.street+', '+ ven.city+', '+ ven.zipcode
@@ -146,15 +150,14 @@ class Meilleurgaragistes_fr(BaseSite):
             else:
                 add_ = None      
             (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
-            
+            if ven.latitude == None and ven.longitude ==None:
+                Util.log.coordinate_logger.error(ven.scrape_page+' : Cannot get GEO code')
             self.link_venues.append(link)
             ven.country='fr'
             desc = xmlBody.find('.//p[@id="description"]')
             desc_ =''
             if desc!=None:
-                
                 desc_ = ''.join(desc.itertext()).strip().replace('\n','|').replace('\t','')
-            
             title = xmlBody.find('.//div[@class="container"]//h2')
             if title !=None and desc !=None:
                 desc_  = title.text+ ' | '+ desc_
@@ -162,7 +165,6 @@ class Meilleurgaragistes_fr(BaseSite):
             desc_ = self.replace__(desc_)
             desc_ = self.replaceSame(desc_, '||', '|').replace('|',' | ')
             ven.description =desc_
-            
             img_link = xmlBody.find('.//div[@class="realisations"]/img')
             if img_link!=None:
                 temp_img  =   ven.img_link = self.__url__+ img_link.get('src')
@@ -171,14 +173,13 @@ class Meilleurgaragistes_fr(BaseSite):
             for it in multi_img:
                 temp_ml = self.__url__+ it.get('src')
                 img_link_arr.append(temp_ml)
-                
             if len(img_link_arr)>0:
                 ven.img_link = img_link_arr
             nr_reviewer = xmlBody.xpath('//div[@class="avisoperation row"]')
             if len(nr_reviewer)>0:
                 ven.hqdb_nr_reviews = str(len(nr_reviewer))
+            ven.is_get_by_address = True
             return ven
-
     def __ServicesParser(self,url,xmlServices):     
             ''
     def getXML(self,xpath_,param_):
@@ -225,7 +226,6 @@ class Meilleurgaragistes_fr(BaseSite):
                 return String_
         else:
             return String_
-        
     def validateStreet2(self, street):
         for reg in self.regex_:
             results = re.search(reg, street, flags=0)
@@ -250,11 +250,21 @@ class Meilleurgaragistes_fr(BaseSite):
                     return None
         else:
             return None
-        
     def validateZipcode(self,zipcode):
-        if zipcode.isdigit() and len(zipcode) ==5:
+        if zipcode.isdigit() and len(zipcode) >=4:
             return zipcode
         else:
-            None   
-                
-            
+            None 
+    def validatePhone__(self,phone,country='FR'):        
+        try:
+            parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
+        except phonenumbers.phonenumberutil.NumberParseException as error: 
+                print phone +' can not parse'
+                Util.log.running_logger.warning(str(phone)+' : cannot parse')
+                return None
+        if not phonenumbers.is_valid_number(parsed_phone):
+            print phone +': not number'
+            Util.log.running_logger.warning(str(phone)+' : not number')
+            return None
+        else:
+            return phone

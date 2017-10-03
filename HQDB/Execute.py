@@ -21,8 +21,8 @@ def main():
     working = Working()
     #working.do(sys.argv) #Comment this line then uncomment line below, if you want to run in Eclipse/PythonIDE
     #working.do(["", "url=https://www.gumtree.com"])
-    working.do(["", "url=https://www.unbiased.co.uk/"]) #374
-    #working.do(["", "url=http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm.html"]) #373
+    #working.do(["", "url=https://www.unbiased.co.uk/"]) #374
+    working.do(["", "url=http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm.html"]) #373
     #working.do(["", "url=https://www.meilleur-garagiste.com"]) #387
     #working.do(["", "url=http://www.drivingschoolsfinder.co.uk/"]) # 391
     #working.do(["", "url=http://www.architecturalindex.com/"]) #399
@@ -32,29 +32,29 @@ def main():
     
 def loops(threadname):
     for i in range(0,10):
+        
         print 'Thread: '+threadname+ ' '+str(i)
         time.sleep(0.2)
+        
+def test(country):
+    listchar =[]
+    for i in range(0,10) + [chr(x) for x in range(ord('a'), ord('z')+1)]:
+        listchar.append(str(i))
+    result = country+': '+ ','.join(listchar)
+    files=  open('D:\\multitest.txt','a')
+    files.write(result+'\r\n')
+    files.close()
+    print result+'\n'
+    return result
 if __name__ == '__main__':
     #Util.checkAPI()
     main()
-    
-    #threading.Thread(target=loops('1')).start()
-    #threading.Thread(target=loops('2')).start()
-    
-    
-    
-    
-
-
-
-
-  
-    #string_ = 'The Guildhall, Street-an-Pol, St Ives, Cornwall, Tr138xq'
-    #print string_[0:string_.find('St Ives')-1]
-#    a ='00000100000000'
-#    a= int(a)
-#    print str(len(str(a)))
-   
-
-        
-   
+    #for i in range(100):
+    #    thread1 = threading.Thread(target=loops,args=(str(i),))
+    #    print thread1.name
+    #    thread1.start()
+    listCountry =['UK','FR','BM','NE','GF','IT','SP','CZ','PL']
+    for coun in range(0,len(listCountry)):
+        thread1 = threading.Thread(target=test,args=(listCountry[coun],))
+        thread1.start()                                 
+                                   

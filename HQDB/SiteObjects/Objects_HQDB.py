@@ -19,7 +19,8 @@ class Venue(object):
     img_link = None
     hqdb_featured_ad_type = None
     hqdb_nr_reviews = None
-    hqdb_review_score = None    
+    hqdb_review_score = None   
+    hqdb_ad_posted = None  
     accreditations = None
     scrape_page = None
     category = None
@@ -33,6 +34,7 @@ class Venue(object):
     mobile_number = None
     mobile_number2 = None
     unidentified_phone_numbers = None
+    is_get_by_address = False
     latitude = None
     longitude = None
     business_email = None
@@ -95,11 +97,12 @@ class Venue(object):
         self.facebook = Validator.RevalidURL(self.facebook)
         self.twitter = Validator.RevalidURL(self.twitter)
         self.instagram = Validator.RevalidURL(self.instagram)
-        self.venue_images = Validator.ReValidString(self.venue_images)        
-        if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude) == False:            
-            Util.log.invalid('GEO code',self.scrape_page + ': invalid GEO code (' + self.latitude + ',' + self.longitude + ')')
-            self.latitude = None
-            self.longitude = None
+        self.venue_images = Validator.ReValidString(self.venue_images)
+        if self.is_get_by_address == False:        
+            if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude) == False:            
+                Util.log.invalid('GEO code',self.scrape_page + ': invalid GEO code (' + self.latitude + ',' + self.longitude + ')')
+                self.latitude = None
+                self.longitude = None
         self.opening_hours_raw = Validator.ReValidString(self.opening_hours_raw)
     
     def getFullAddress(self): 
@@ -144,6 +147,7 @@ class Venue(object):
         self.hqdb_featured_ad_type = Validator.ReValidString(self.hqdb_featured_ad_type)
         self.hqdb_nr_reviews = Validator.ReValidString(self.hqdb_nr_reviews)
         self.hqdb_review_score = Validator.ReValidString(self.hqdb_review_score)        
+        self.hqdb_ad_posted = Validator.ReValidString(self.hqdb_ad_posted)
         self.accreditations = Validator.ReValidString(self.accreditations)        
         self.category = Validator.ReValidString(self.category)
         self.subcategory = Validator.ReValidString(self.subcategory)
@@ -185,10 +189,11 @@ class Venue(object):
             self.venue_images = self.venue_images.replace(' ','%20')
             if Validator.RevalidURL(self.venue_images) == False:            
                 Util.log.running_logger.error('{0}: {1}: {2}'.format(self.scrape_page,"Invalid Venue_Image: ",self.venue_images))
-                self.venue_images = None        
-        if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude,self.scrape_page) == False:            
-            self.latitude = None
-            self.longitude = None
+                self.venue_images = None
+        if self.is_get_by_address == False:        
+            if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude,self.scrape_page) == False:            
+                self.latitude = None
+                self.longitude = None
         self.opening_hours_raw = Validator.ReValidString(self.opening_hours_raw)
         return True    
         
@@ -205,7 +210,8 @@ class Venue(object):
                              ('img_link',self.img_link),
                              ('hqdb_featured_ad_type',self.hqdb_featured_ad_type),
                              ('hqdb_nr_reviews',self.hqdb_nr_reviews),
-                             ('hqdb_review_score',self.hqdb_review_score),                             
+                             ('hqdb_review_score',self.hqdb_review_score),        
+                             ('hqdb_ad_posted',self.hqdb_ad_posted),                     
                              ('accreditations',self.accreditations),
                              ('scrape_page',self.scrape_page),
                              ('category',self.category),
@@ -252,7 +258,8 @@ class Venue(object):
                              ('img_link',self.img_link),
                              ('hqdb_featured_ad_type',self.hqdb_featured_ad_type),
                              ('hqdb_nr_reviews',self.hqdb_nr_reviews),
-                             ('hqdb_review_score',self.hqdb_review_score),                             
+                             ('hqdb_review_score',self.hqdb_review_score), 
+                             ('hqdb_ad_posted',self.hqdb_ad_posted),                            
                              ('accreditations',self.accreditations),                             
                              ('category',self.category),
                              ('subcategory',self.subcategory),

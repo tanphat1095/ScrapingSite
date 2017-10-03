@@ -8,8 +8,8 @@ import re
 import time
 import phonenumbers
 from selenium import webdriver
-
 import urllib3
+import threading
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class Acca_gb(BaseSite):
     """description of class"""
@@ -32,30 +32,36 @@ class Acca_gb(BaseSite):
     outFileVN = ''
     outFileSV = ''
     listlink =[]
-    phoneRemove= ['01717643013','32475466172','09793373930']
+    countryRunning=[]
+    phoneRemove= ['01717643013','32475466172','09793373930','246988907791297065']
     listCountry =['UK','FR','BM','NE','GF','IT','SP','CZ','PL']
-   
+    index_ =-1
     
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
         self._output = output
         self._isWriteList = isWriteList
-        
-    
     def doWork(self):
         self.phoneCodeList = Util.getPhoneCodeList()
+        for countr in range(0,len(self.listCountry)):
+            countr_ = self.listCountry[countr]
+            existing=[x for x in self.countryRunning if countr_ in x]
+            if len(existing)<=0:
+                self.countryRunning.append(countr_)
+                thread1 = threading.Thread(target=self.__getListVenues,args=(countr_,))
+                thread1.start()
+                time.sleep(2)
         
-        
-        
-        
-        self.__getListVenues()
-    def __getListVenues(self):
-        print "Getting list of Venues"
-        file = open('Data/EngCity.txt','r')
-        postcode = file.read().splitlines()
-        indexUrl =0
-        indexItems =0
-        for countr in self.listCountry:
+    def addindex(self):
+        index__ = self.index_+1
+        self.index_ = index__
+        return index__
+         
+    def __getListVenues(self,countr):
+          print "Getting list of Venues"
+          indexUrl =0
+          indexItems =0
+        #for countr in self.listCountry:
           print 'Country: '+ countr #range(0,10) +
           for post in  range(0,10) + [chr(x) for x in range(ord('a'), ord('z')+1)]:
                page =1
@@ -99,25 +105,34 @@ class Acca_gb(BaseSite):
                                       certifi = p[h5_c].text.replace('\n','').replace('\t','')
                                   if h5[h5_c].text =='Services offered':
                                       servicesstr = p[h5_c].text.replace('\n','').replace('\t','').replace(',,',',')
-                         td = show.xpath('./td')
-                         link = td[0].find('./h5/a').get('href')
-                         id_ =  link[link.find('advisorid=')+len('advisorid='):+ len(link)]
-                       self.listlink.append(id_)
+                       td = show.xpath('./td')
+                       link = td[0].find('./h5/a').get('href')
+                       id_ =  link[link.find('advisorid=')+len('advisorid='):+ len(link)]
                        
+                       existing=[x for x in self.listlink if id_ in x]
+                       if len(existing)>0:
+                           continue
+                       self.listlink.append(id_)  
+                         
+                        
                        #servicesstr ='Business plans, Business start-up and company formation, Limited company accounts, Management advice to business, Partnership / sole trader accounts, Tax(CGT, Corporate, IHT, Personal and VAT)'
                        ven =self.__VenueParser(show,countr)
-                       ven.adid = id_
-                       ven.business_website = self.validateWebsite(ven.business_website)
+                       
+                       if ven!=None:
+                           index__ = self.addindex()
+                           ven.adid = id_
+                           ven.business_website = self.validateWebsite(ven.business_website)
                       
-                      
-                       print 'Writing index: '+str(indexItems)
-                       ven.writeToFile(self.folder,indexItems,ven.name,False)
-                       indexItems+=1
+                           
+                           print 'Writing index: '+str(index__)
+                           ven.writeToFile(self.folder,index__,ven.name,False)
+                           #self.index_+=1
                    countRequest+=1
                    print str(len(self.venues_))+' venues'
                    print str(len(self.services))+' services'
 
-    def __VenueParser(self, element,countr):        
+    def __VenueParser(self, element,countr):  
+         
         ven = Venue()
         ven.country ='gb'
         td = element.xpath('./td')
@@ -127,15 +142,17 @@ class Acca_gb(BaseSite):
         link =  aTag.get('href')
         
         findCity  = locate.find('./div')
-        ven.business_email=''
+        #ven.business_email=''
         ven.name = aTag.text.replace('/','-')
         ven.scrape_page =self.__url__+  link
         
       
         
         xmlVenues = Util.getRequestsXML(ven.scrape_page, '//div[@id="main"]') #//div[@class="content-section no-padding"]
-        
+        if xmlVenues==None:
+            return None
         addressInfo = xmlVenues.xpath('//address')
+        
         address_ = ''
         if len(addressInfo)>0:
             address_ = ' '.join(addressInfo[0].itertext()).replace('\n','').replace('  ',' ').replace(ven.name.strip(),'')
@@ -169,7 +186,7 @@ class Acca_gb(BaseSite):
         address = ' '.join(locate.itertext()).replace('\t','')
         address_ = address.split('\n')
         lensAdd = len(address_)
-        zipcode =address_[lensAdd-1]
+        #zipcode = address_[lensAdd-1]
         info = address_[lensAdd-3].split(',')
         info = info[len(info)-1]
         info = info.split()
@@ -182,12 +199,25 @@ class Acca_gb(BaseSite):
             city = info[len(info)-1]
             street= ' '.join(info[0:len(info)-1]).replace(ven.name.strip(), '').replace('PO BOX 16988','')
         
+        
+        if city !=None:
+            for ad in range(0,lensAdd):
+                if address_[ad].find(city)!=-1:
+                    if (lensAdd -1)-ad ==2:
+                        zipcode = address_[lensAdd-1]
+                        ven.zipcode = zipcode
+                        break
+        
+        
+        if ven.zipcode!=None:
+            if len(ven.zipcode.strip())==2:
+                ven.zipcode.replace('de', '').replace('DE','') 
         if street.upper().find('PO BOX')>=0:
             street = None
         city = city.upper()
         
         ven.city = city
-        ven.zipcode = zipcode
+        #ven.zipcode = zipcode
         ven.street = self.validateStreet(street)
         
         
@@ -195,11 +225,13 @@ class Acca_gb(BaseSite):
             
         #ven.zipcode = 'HA3 7QT'
         #ven.formatted_address =''
-        (ven.latitude,ven.longitude) = self.getLatlng(maps, countr)
+        
+        
+        '''(ven.latitude,ven.longitude) = self.getLatlng(maps, countr)
         if ven.latitude==None and ven.longitude==None:
             (ven.latitude,ven.longitude) = self.getLatlng(ven.zipcode, countr)
             if ven.latitude==None and ven.longitude == None:
-                Util.log.running_logger.info(maps.replace('+',' ')+': '+ 'cannot get GEO code')
+                Util.log.running_logger.info(maps.replace('+',' ')+': '+ 'cannot get GEO code')'''
             
         li = contact.xpath('./ul/li')
         for l in li :
@@ -241,7 +273,7 @@ class Acca_gb(BaseSite):
       
       
             
-      
+        ven.is_get_by_address = True
         return ven
         
     def __ServicesParser(self,stringServices):        
@@ -401,10 +433,10 @@ class Acca_gb(BaseSite):
         try:
             parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
         except phonenumbers.phonenumberutil.NumberParseException as error: 
-                print phone +' can not parse'
+                print str(phone) +' can not parse'
                 return None
         if not phonenumbers.is_valid_number(parsed_phone):
-            print phone +': not number'
+            print str(phone) +': not number'
             return None
         else:
-            return phone
+            return str(phone)

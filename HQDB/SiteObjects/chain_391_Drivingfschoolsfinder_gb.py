@@ -6,6 +6,7 @@ from lxml import etree as ET
 from SiteObjects.Objects_HQDB import Venue, Service
 import re
 import json
+import time
 import urllib3
 from operator import div
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -61,6 +62,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
                             print 'Writing to Index: '+ str(index_)
                             ven.writeToFile(self.folder, index_, ven.name, False)
                             index_+=1
+                            time.sleep(2)
                 
            
     def __VenueParser(self,url__, name__):
@@ -188,6 +190,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
                     address_ = ven.street+', '+ven.city+', '+ ven.zipcode
                 ven.pricelist_link = [ven.scrape_page]
                 (ven.latitude,ven.longitude) = self.getLatlng(address_, 'UK')
+            ven.is_get_by_address = True
             return ven
     def __ServicesParser(self,url,xmlServices):        
             ''

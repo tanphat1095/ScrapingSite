@@ -7,6 +7,7 @@ from SiteObjects.Objects_HQDB import Venue, Service
 import re
 import json
 import time
+import threading
 import requests
 import phonenumbers
 from selenium import webdriver
@@ -16,6 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from time import sleep
 import urllib3
+from numpy.core.defchararray import index
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -42,6 +44,7 @@ class Unbiased_gb(BaseSite):
     list_url =[]
     vens=[]
     serv=[]
+    index__= -1
     listPhoneremove =['01615069963','01615069598','01615069896']
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
@@ -50,23 +53,22 @@ class Unbiased_gb(BaseSite):
     def doWork(self):
   
         self.phoneCodeList = Util.getPhoneCodeList()
-        '''ex_ = re.search('([Gg][Ii][Rr]0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})',
-                             'Drovers Lodge, Coombe Lane, Kent, Tenterden,',
-                             flags=0)
-        print ex_.group(0)'''
-        
-        
-        
-        '''self.listPhoneremove.append('+441213216060')
-        for phone in self.listPhoneremove:
-            print self.validatePhone__(phone, 'gb')'''
-        
-        
-        
+   
+        '''for i in range(10):
+            thread1 = threading.Thread(target=self.print_ex,args=(i,))
+            thread1.start()'''
         self.__getListVenues()    
         
-
+    '''def print_ex(self,threadname):
+        for i in range(10):
+            self.index__ +=1
+            print 'Thread :'+ str(threadname)+'-'+ str(self.index__) '''
         
+        
+    def addIndex(self):
+        index_ = self.index__+1
+        self.index__ = index_
+        return index_
     def __getListVenues(self):
         print "Getting list of Venues"
         files_ = open('Data/EngCity.txt','r')

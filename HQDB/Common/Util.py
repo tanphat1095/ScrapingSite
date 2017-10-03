@@ -14,6 +14,7 @@ import csv
 import unicodecsv
 import json
 import datetime
+import random
 from collections import OrderedDict
 from Common.Logging import Log
 from Common import StatusCode
@@ -47,11 +48,11 @@ geocodeAPI_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
                   'AIzaSyBgOFAVElGalbpf8E77qFu4F4_1UAQgjG4',
                   'AIzaSyBVcJQvNneYV5ElRYQ7Rt2nKHXVXDNCYbM',
                   'AIzaSyB4VhdBL6zvIr_o9TV9kud7dhfAfEYpi-s',
-                  'AIzaSyDntti4ZJI6VDlDliPo7imO-8FZiNppN-w',  
+                  'AIzaSyDntti4ZJI6VDlDliPo7imO-8FZiNppN-w',
                   'AIzaSyDEjA8msKq-WlkOfEFBElctj3QBB4ASPrQ',
                   'AIzaSyB9--gWXJs1eaFc7x4ibapYMsI9lgySENs',
                   'AIzaSyCr8HcTZ40PklYd_7AdMKu4RdlzRCXeMkQ',
-				  'AIzaSyCDtJ0-wUO5YAOtYr37IfekH4YV44KCN_c']
+                  'AIzaSyCDtJ0-wUO5YAOtYr37IfekH4YV44KCN_c']
 
 
 
@@ -287,8 +288,15 @@ def getGEOCode(fulladdress,country):
     try:
         status = ''
         index = 0
-        json_location = json.loads('{"status": null,"results":null}')
-        while status != "OK" and index < len(geocodeAPI_key):
+        index_run = []
+        json_location = json.loads('{"status": null,"results":null}')        
+        while status == 'OVER_QUERY_LIMIT' or status == '':            
+            index_run.append(index)
+            while index in index_run:
+                index = random.randint(0,len(geocodeAPI_key) - 1)
+                if len(index_run) == len(geocodeAPI_key):
+                    log.coordinate_logger.warning('[API Key]: OVER_QUERY_LIMIT')
+                    return json.loads('{"status": null,"results":null}')                            
             APIKey = geocodeAPI_key[index]
             url = "https://maps.googleapis.com/maps/api/geocode/json"
             querystring = {
@@ -303,13 +311,10 @@ def getGEOCode(fulladdress,country):
             response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
             json_location = response.json()
             status = json_location.get('status')
-            if status == "OVER_QUERY_LIMIT":
-                index+=1
-            else:
-                break                        
         return json_location
     except Exception,ex:        
-        return None
+        return json.loads('{"status": null,"results":null}')
+
 
 def subtractTime(t1,t2):        
         # caveat emptor - assumes t1 & t2 are python times, on the same day and

@@ -337,6 +337,7 @@ class Blaurabeit_de(BaseSite):
                         ven.accreditations = certi_
                     ven.img_link = img_link
                     ven.country ='de'
+                    ven.is_get_by_address = True
                     return ven
             else:
                 return None
