@@ -1,8 +1,3 @@
-'''
-Created on 28 thg 8, 2017
-
-@author: phat.le
-'''
 #coding: utf-8
 from __future__ import unicode_literals
 from BaseSite import BaseSite
@@ -40,7 +35,8 @@ class Meilleurgaragistes_fr(BaseSite):
     runningThread =[]
     listlink=[]
     phoneRemove =['08714856510','055094212','0549569']
-    regex_= ['(BP[\s][\d]{5})','(BP[\d]{5})','(BP[\s][\d]{3})','(CS[\s][\d]{5})','(CS[\d]{5})','([\d]{4,20})']
+    removeFromStreet=['-',',','.']
+    regex_= ['(BP[\s][\d]{1,5})','(BP[\d]{1,5})','(BP[\s][\d]{1,5})','(B.P.[\s][\d]{1,5})','(CS[\s][\d]{1,5})','(CS[\d]{1,5})','([\d]{1,4}[\s]{1,5}[\d]{1,4})','([\d]{4,20})']
     
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
@@ -53,8 +49,11 @@ class Meilleurgaragistes_fr(BaseSite):
         '''
         #Write Files
         self.phoneCodeList = Util.getPhoneCodeList()
+        #string =  'SILIGOM - SARL PNEU ROUTE 01  165 RADIOR'
+        #print self.validateStreet2(string)
+        #print self.replaceChar('-', self.replaceChar(',', string, True), True)
         self.__getListVenues()
-        
+        #self.__VenueParser('https://www.meilleur-garagiste.com/annuaire/eurotyre-bot630.460039.html')
         
     def addIndex(self):
         index = self.indexc_+1
@@ -69,6 +68,7 @@ class Meilleurgaragistes_fr(BaseSite):
                 self.runningThread.remove(thread_)
         print str(count) +' thread is runing'
         return count
+    
     def __getListVenues(self):
         print "Getting list of Venues"
         index = 1
@@ -79,17 +79,19 @@ class Meilleurgaragistes_fr(BaseSite):
             #print ET.dump(xmlDoc)
             index+=1
             listPerpage = xmlDoc.xpath('//a/h2/parent::a')
-            '''if len(listPerpage)>0:
+            if len(listPerpage)>0:
             
                 for item in listPerpage:
                     link__ = self.__url__+ item.get('href')
                     self.listlink.append(link__)
                 print 'Found: '+ str(len(self.listlink))
+                
             else:
                 print 'End'
                 break
         print 'Total: '+str(len(self.listlink))+' url found'
         while len(self.listlink)>0:
+            print str(len(self.listlink)) +' link exist'
             if self.checkAlive()<5:
                 items=  self.listlink[-1]
                 #link_ = self.__url__+ items.get('href')
@@ -97,29 +99,43 @@ class Meilleurgaragistes_fr(BaseSite):
                 self.listlink.remove(items)
                 self.runningThread.append(thread1)
                 thread1.start()
+                time.sleep(0.3)
+                #time.sleep(1)
             else:
-                time.sleep(5)'''
-            if len(listPerpage)>0:
+                time.sleep(1)
+            '''if len(listPerpage)>0:
                 while len(listPerpage)> 0:
                     if self.checkAlive()<5:
-                        items =listPerpage[-1]
-                        link_ = self.__url__+ items.get('href')
-                        thread1 = threading.Thread(target=self.__VenueParser(link_))
-                        self.runningThread.append(thread1)
-                        listPerpage.remove(items)
-                        thread1.start()
+                        try:
+                            items =listPerpage[-1]
+                            link_ = self.__url__+ items.get('href')
+                            thread1 = threading.Thread(target=self.__VenueParser,args=(link_,))
+                            self.runningThread.append(thread1)
+                            listPerpage.remove(items)
+                            thread1.start()
+                            time.sleep(0.1)
+                        except Exception,ex:
+                            print ex
+                            continue
+                    else:
+                        time.sleep(1)
                 
             else:
                 print 'End'
-                break
-            
+     
+               break'''
+    def getFromList(self,list_):
+        for items in list_:
+            link = self.__url__+ items.get('href')
+            self.listlink.append(link)
+            print link      
     def __VenueParser(self, link): 
         #link ='https://www.meilleur-garagiste.com/annuaire/garage-la-couronne.464207.html'       
         print 'Scrapping: ' + link+'\n'
         existing=[x for x in self.link_venues if link in x]
         if len(existing)>0:
             print 'Len existing : '+ str(len(existing))
-            return None
+            return 
         xmlBody = Util.getRequestsXML(link,'//div[@id="fiche-artisan"]')
         if xmlBody !=None and len(xmlBody)>0:
             ven = Venue()
@@ -129,15 +145,15 @@ class Meilleurgaragistes_fr(BaseSite):
                     name_h1 = name_[0].find('./h1')
                     name_h2 = name_[0].find('.//h2')
                     if name_h2!=None:
-                        ven.name = name_h2.text
+                        ven.name = name_h1.text
                     else:
                         ven.name = name_h1.text
            
             else:
-                return None           
+                return            
             xmldiv = xmlBody.find('.//div[@class="row nomargin"]/div')
             if xmldiv ==None: 
-                return None
+                return 
             span_ = xmldiv.xpath('./span')
             for i_ in span_:
                 if i_.get('class')== 'street-address text-hide-mobile':
@@ -145,6 +161,11 @@ class Meilleurgaragistes_fr(BaseSite):
                     if ven.street!=None:
                         #ven.street = self.validateStreet(ven.street).replace('43442491700012', '')
                         ven.street = self.validateStreet2(ven.street).replace('43442491700012', '')
+                        #ven.street = self.replaceChar('-', self.replaceChar(',', ven.street, True), True)
+                        #ven.street = self.replaceChar(',', self.replaceChar('-', ven.street, True), True)
+                        ven.street = self.replaceChar('-', ven.street, False)
+                        for r in self.removeFromStreet:
+                            ven.street = self.replaceChar(r, ven.street, True)
                         if ven.street.strip()=='.':
                             ven.street= None
                 if i_.get('class')=='postal-code':
@@ -194,7 +215,7 @@ class Meilleurgaragistes_fr(BaseSite):
             img_link_arr = []
             desc_ = self.replace__(desc_)
             desc_ = self.replaceSame(desc_, '||', '|').replace('|',' | ')
-            ven.description =desc_
+            ven.description =desc_.replace('|', '\n')
             img_link = xmlBody.find('.//div[@class="realisations"]/img')
             if img_link!=None:
                 temp_img  =   ven.img_link = self.__url__+ img_link.get('src')
@@ -209,8 +230,12 @@ class Meilleurgaragistes_fr(BaseSite):
             if len(nr_reviewer)>0:
                 ven.hqdb_nr_reviews = str(len(nr_reviewer))
             ven.is_get_by_address = True
-            
-            
+            ven.category='Garages/Car services'
+            featureAd= xmlBody.find('.//a[@class="vert-text modal-trigger"]/strong')
+            if featureAd!=None:
+                text = featureAd.text.replace('é','e')
+                if text =='Entreprise verifiee ':
+                    ven.hqdb_featured_ad_type ='Featured'
             if ven.zipcode !=None  and len(ven.zipcode)>0 and ven.zipcode.isdigit() :
                 zip_ = int(ven.zipcode)
                 if zip_ <1000 :
@@ -276,7 +301,7 @@ class Meilleurgaragistes_fr(BaseSite):
         for reg in self.regex_:
             results = re.search(reg, street, flags=0)
             if results!=None:
-                street = street.replace(results.group(1),'')
+                street = street.replace(results.group(0),'')
         return street
     def validatePhone(self,phone):
         if phone ==None:
@@ -305,12 +330,24 @@ class Meilleurgaragistes_fr(BaseSite):
         try:
             parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
         except phonenumbers.phonenumberutil.NumberParseException as error: 
-                print phone +' can not parse'
+                print str(phone) +' can not parse'
                 Util.log.running_logger.warning(str(phone)+' : cannot parse')
                 return None
         if not phonenumbers.is_valid_number(parsed_phone):
-            print phone +': not number'
+            print str(phone) +': not number'
             Util.log.running_logger.warning(str(phone)+' : not number')
             return None
         else:
             return phone
+    def replaceChar(self,char,string,isStart=True):
+        string = string.strip()
+        if isStart ==True:
+            if string.startswith(char):
+                string = string[1:len(string)]
+        else:
+            if string.endswith(char):
+                string = string[0:len(string)-1]
+        
+        return string
+        
+        

@@ -8,8 +8,10 @@ import re
 import json
 import time
 import urllib3
+import phonenumbers
 from operator import div
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import threading
 class Drivingfschoolsfinder_gb(BaseSite):
     phoneCodeList = None
     __url__ = 'http://www.drivingschoolsfinder.co.uk/'
@@ -25,30 +27,63 @@ class Drivingfschoolsfinder_gb(BaseSite):
     outFileVN = ''
     outFileSV = ''
     venuesList =[]
-    removeChar= ['1 and 2 Hour','hour & haft and two hour lessons .','10% discount when paying for 10 lessons','1 and 2 hour','1 or 2 hour lessons','One Hour','2hrs','5 hours','1hr30 min','2hr','3 HOURS','6 hours','From','per hour','ONE HOUR','per one hour','First hour','first 5 hours','First 5 hours','(subject to terms and conditions 1x2x2 hours)','one hour','60 minute','one or two hour','1hr','1.5hr','1 hour']
+    removeChar= ['10% Discount','Hourly lessons','90 & 120 minute','1 and 2 Hour','hour & haft and two hour lessons .','10% discount when paying for 10 lessons','1 and 2 hour','1 or 2 hour lessons','One Hour','2hrs','5 hours','1hr30 min','2hr','3 HOURS','6 hours','From','per hour','ONE HOUR','per one hour','First hour','first 5 hours','First 5 hours','(subject to terms and conditions 1x2x2 hours)','one hour','60 minute','one or two hour','1hr','1.5hr','1 hour','2 hour','/']
+    regexString=['(?<!%)(?:[€$£]\s*(\d*[\,\.]?\d{1,2})|(\d*[\,\.]?\d{1,2})\s*(?:[€$£]|zł|kč|pln|złt))\s*(?<!%)(?!%)']
+    regexZipcode='((?:[gG][iI][rR] {0,}0[aA]{2})|(?:(?:(?:[a-pr-uwyzA-PR-UWYZ][a-hk-yA-HK-Y]?[0-9][0-9]?)|(?:(?:[a-pr-uwyzA-PR-UWYZ][0-9][a-hjkstuwA-HJKSTUW])|(?:[a-pr-uwyzA-PR-UWYZ][a-hk-yA-HK-Y][0-9][abehmnprv-yABEHMNPRV-Y]))) {0,}[0-9][abd-hjlnp-uw-zABD-HJLNP-UW-Z]{2}))'
     __city__ = []
+    
+    index_ =-1
+    runningThread =[]
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
         self._output = output
         self._isWriteList = isWriteList
     def doWork(self):
         #Set OutFile Values
-        
-        #string__ = 'SPECIAL OFFER FIRST 3 HOURS £30 Single lessons'
-        #string__ =  self.validateServices(string__) 
-        
+
+        #string= 'first £49.50 biginners only discounts for block bookings discounts for students and nursers pass plus refresher courses'
+        #print self.validateNameServices(string)
+        #print self.validateZipcode('S74OAP')
         
         
         self.phoneCodeList = Util.getPhoneCodeList()
         self.__list_city()
         print 'Total city: '+ str(len(self.__city__))
-        self.__getListVenues()
-    def __getListVenues(self):
-        print "Getting list of Venues"
-        lens= len(self.__city__)
-        index_ = 0
-        for city in range(0,lens):
-            _Schools = Util.getRequestsXML(self.__city__[city], '//td[@class="welcome-padding"]/table')
+        #self.__getListVenues()
+        while len(self.__city__)>0:
+            if self.checkAlive()<5:
+                thread_ = threading.Thread(target=self.__getListVenues,args=(self.__city__[-1],))
+                self.__city__.remove(self.__city__[-1])
+                self.runningThread.append(thread_)
+                thread_.start()
+                time.sleep(0.5)
+            else:
+                time.sleep(1)
+                
+        
+    def addIndex(self):
+        index = self.index_+1
+        self.index_ =  index
+        return index  
+    def checkAlive(self):
+        count =0
+        for t in self.runningThread:
+            if t.isAlive():
+                count+=1
+            else:
+                self.runningThread.remove(t)
+        print str(count)+' thread running'
+        return count
+    def __getListVenues(self,city):
+        #print "Getting list of Venues"
+        #lens= len(self.__city__)
+        #index_ = 0
+        #for city in range(0,lens):
+            
+            _Schools = Util.getRequestsXML(city, '//td[@class="welcome-padding"]/table')
+            if _Schools == None:
+                Util.log.running_logger.warning(city+' Done')
+                return
             if len(_Schools)>=2:
                 tds = _Schools[1].xpath('./tr/td')
                 for td in tds:
@@ -59,14 +94,17 @@ class Drivingfschoolsfinder_gb(BaseSite):
                         
                         ven =  self.__VenueParser(link,name)
                         if ven!=None:
+                            index_ = self.addIndex()
                             print 'Writing to Index: '+ str(index_)
                             ven.writeToFile(self.folder, index_, ven.name, False)
-                            index_+=1
-                            time.sleep(2)
-                
-           
+                            #index_= self.addIndex()
+                            #time.sleep(2)
+                Util.log.running_logger.warning(city+' Done')
     def __VenueParser(self,url__, name__):
         print 'Scraping: '+ url__
+        existing=[x for x in self.venuesList if url__ in x]
+        if len(existing)>0:
+            return None
         #url__ ='http://www.drivingschoolsfinder.co.uk/city-Accrington/1846198-driving-Terrys-School-of-Motoring.html'
         #name__ ='Terrys School of Motoring'
         city = url__.split('/')[3].replace('city-','').replace('-',' ')
@@ -109,21 +147,29 @@ class Drivingfschoolsfinder_gb(BaseSite):
                 zipcode = address[len(address)-1]
                 street__ = street.upper()
                 if street__.find('PO BOX')==-1:
-                    ven.street = street
-                ven.zipcode=  zipcode
+                    ven.street = street.replace('n/a', '').replace('***', '').replace('6 weldon place croy', '').replace('cumbernauld41 napier square bellshill ml4 1tb', '')
+                if ven.street =='-':
+                    ven.street = None
+                ven.zipcode=  self.validateZipcode(zipcode)
                 
                 phone = info_[info_.find('Phone:')+ len('Phone:'):info_.find('Fax:')].replace(' ','')
                 if phone.isdigit():
                     if phone.startswith('07')| phone.startswith('7'):
                         ven.mobile_number = self.validatePhone(phone)
+                        ven.mobile_number = self.validatePhone__(ven.mobile_number, 'gb')
                     else:
                         ven.office_number = self.validatePhone(phone)
+                        ven.office_number = self.validatePhone__(ven.office_number, 'gb')
                 services_ = info_[info_.find('Services Offered:')+len('Services Offered:'):info_.find('Areas Served:')].strip().replace(';',',')
                 if services_ != 'None Listed - [Edit]':
                     services_ = services_.replace('/', ',').replace(',,', ',').split(',')
                     for s in services_:
                         name = self.validateServices(s)
-                        if len(name)>=2:
+                        if len(name)>=5:
+                            name__ =name.split()
+                            for n in name__:
+                                name = self.validateNameServices(name)
+                        if len(name.strip())>=5:
                             services = Service()
                             services.service = name
                             sers.append(services)
@@ -182,14 +228,26 @@ class Drivingfschoolsfinder_gb(BaseSite):
                             ven.business_website = self.formatWeb_(web_)
                             print ven.business_website
                             break
-                            
+                address_ =''           
                 if ven.street ==None:
                     address_ =ven.city+', '+ ven.zipcode
                     #ven.formatted_address = ven.city+', '+ven.zipcode
                 else:
-                    address_ = ven.street+', '+ven.city+', '+ ven.zipcode
+                    if ven.zipcode!=None:
+                        address_ = ven.street+', '+ven.city+', '+ ven.zipcode
+                    else: 
+                        address_ = ven.street+', '+ven.city
                 ven.pricelist_link = [ven.scrape_page]
-                (ven.latitude,ven.longitude) = self.getLatlng(address_, 'UK')
+                
+                
+                
+                ''' get lat -lng '''
+                if address_!= '':
+                    try:
+                        (ven.latitude,ven.longitude) = self.getLatlng(address_, 'UK')
+                    except Exception,ex:
+                        Util.log.running_logger.error(ven.scrape_page+' : '+ex)
+                        return None
             ven.is_get_by_address = True
             return ven
     def __ServicesParser(self,url,xmlServices):        
@@ -239,13 +297,17 @@ class Drivingfschoolsfinder_gb(BaseSite):
     def validateServices(self,name__):
             for char  in self.removeChar:
                 name__ =   name__.replace(char,'')
-            arr =  name__.split()
-            for ar in range(0,len(arr)):
+            #arr =  name__.split()
+            '''for ar in range(0,len(arr)):
                 if arr[ar].find('£')>=0:
-                    arr[ar] =''
-            return ' '.join(arr)
-                
-    
+                    arr[ar] ='''
+            return name__
+    def validateNameServices(self,name):
+        for regex in self.regexString:
+            result= re.search(regex, name, flags=0)
+            if result!=None:
+                name = name.replace(result.group(0),'')
+        return name
     
     
     
@@ -271,3 +333,27 @@ class Drivingfschoolsfinder_gb(BaseSite):
         else:
             phone = None
         return phone
+    def validatePhone__(self,phone,country='gb'):        
+        try:
+            parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
+        except phonenumbers.phonenumberutil.NumberParseException as error: 
+                print str(phone) +' can not parse'
+                if phone!=None:
+                    Util.log.running_logger.warning(str(phone)+' : cannot parse')
+                return None
+        if not phonenumbers.is_valid_number(parsed_phone):
+            print str(phone) +': not number'
+            if phone!=None:
+                Util.log.running_logger.warning(str(phone)+' : not number')
+            return None
+        else:
+            return phone
+    def validateZipcode(self,zipcode):
+        result = re.search(self.regexZipcode, zipcode, 0)
+        if result!=None:
+            if result.group(0).strip()!=zipcode.strip():
+                return None
+            else:
+                return zipcode
+        else:
+            return None

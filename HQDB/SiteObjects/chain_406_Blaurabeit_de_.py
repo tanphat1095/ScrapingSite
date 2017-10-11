@@ -9,11 +9,13 @@ import json
 import urllib3
 import requests
 import time
+import phonenumbers
 from lxml import html
 from audioop import add
 from Common.Validation import CityZipcode
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class Blaurabeit_de(BaseSite):
     '''
@@ -53,7 +55,7 @@ class Blaurabeit_de(BaseSite):
     def __getListVenues(self):
             
             
-            setvenuesperCate= 85
+            setvenuesperCate= 834
             
             with open('Data/Category_chain_406.txt') as f:
                 line_ = f.read().splitlines()
@@ -212,9 +214,9 @@ class Blaurabeit_de(BaseSite):
                         if key_ =='Tel:':
                             values_ = values_.replace('/', '').replace(' ', '').replace('Tel', '')
                             if values_.startswith('01')| values_.startswith('+0041')| values_.startswith('0041'):
-                                ven.mobile_number = self.validatePhone(values_)
+                                ven.mobile_number = self.validatePhone__(self.validatePhone(values_), 'de')
                             else:
-                                ven.office_number = self.validatePhone(values_)
+                                ven.office_number = self.validatePhone__(self.validatePhone(values_), 'de')
                             
                     img_ = leftInfo.find('./div/div[@class="profile_top_right"]/img')
                     if img_!=None:
@@ -266,20 +268,15 @@ class Blaurabeit_de(BaseSite):
                     if ven.formatted_address!=None:
                         address_ = ven.formatted_address
                     
-                    if len(address_.strip())>5:
-                        (ven.latitude,ven.longitude)  = self.getLatlng(address_,'DE') #script_
+                    #if len(address_.strip())>5:
+                    #    (ven.latitude,ven.longitude)  = self.getLatlng(address_,'DE') #script_
                     
                     
-                        if ven.latitude== None and ven.longitude == None:
-                            zipFrom = self.findZipcode(address_)
-                            if zipFrom!=None:
-                                (ven.latitude,ven.longitude) = self.getLatlng(zipFrom, 'DE')
-                                if ven.latitude ==None and ven.longitude==None:
-                                    Util.log.running_logger.info(address_+' : cannot get GEO code')
-                                else:
-                                    Util.log.running_logger.info(address_+' : cannot get GEO code')
-                            else:
-                                Util.log.running_logger.info(address_+' : cannot get GEO code')
+                    zipFrom = self.findZipcode(address_)
+                    if zipFrom!=None:
+                        (ven.latitude,ven.longitude) = self.getLatlng(zipFrom, 'DE')
+                        if ven.latitude ==None and ven.longitude==None:
+                            Util.log.running_logger.info(address_+' : cannot get GEO code')
                     redirecPhotos= rightInfo.find('./nav/div/ul/li[@class="tabOff tab_foto"]/a')
                     if redirecPhotos!=None:
                         linkPhotos =  redirecPhotos.get('href')
@@ -287,9 +284,10 @@ class Blaurabeit_de(BaseSite):
                             linkPhotos = self.__url__+ linkPhotos
                         time.sleep(1)
                         xpathPhotos =  Util.getRequestsXML(linkPhotos, '//div[@class="portfolio thumbs"]/a')
-                        listImg = xpathPhotos.xpath('./a')
-                        for __img in listImg:
-                            img_link.append(__img.get('data-thumb'))
+                        if xpathPhotos!=None:
+                            listImg = xpathPhotos.xpath('./a')
+                            for __img in listImg:
+                                img_link.append(__img.get('data-thumb'))
                     
                     
                     desElement= rightInfo.find('./div/div[@id="cont_about"]')
@@ -457,7 +455,20 @@ class Blaurabeit_de(BaseSite):
         for i in range(0,len(findchar)):
             if des.find('[if')>=0:
                 remove_ = des[des.find('[if'):des.find('endif]')+len('endif]')]
-                des = des.replace(remove_,'')
+                des = des.replace(remove_,'')          
+        findStart = self.findAllPositionCharinString('/* Font Definitions */', des)
+        while len(findStart)>1:
+            findStart = self.findAllPositionCharinString('/* Font Definitions */', des)
+            endchar = 'ul \t{margin-bottom:0cm;}'
+            findend= self.findAllPositionCharinString(endchar, des)
+            if len(findend)==0:
+                endchar='page:Section1;}'
+                findend= self.findAllPositionCharinString(endchar, des)
+            if len(findend)==0:
+                    print 'can found end point'
+                    break
+            remove_2 = des[findStart[0]:findend[0]+len(endchar)]
+            des =  des.replace(remove_2,'')
         return des.replace('�','').replace('-',' ').replace('..',' ').replace('__','')
     def getLatlng(self,address,countr):
         if address.strip()=='':
@@ -532,5 +543,17 @@ class Blaurabeit_de(BaseSite):
         else:
             return None
         
-                
+    def validatePhone__(self,phone,country='FR'):        
+        try:
+            parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
+        except phonenumbers.phonenumberutil.NumberParseException as error: 
+                print str(phone) +' can not parse'
+                Util.log.running_logger.warning(str(phone)+' : cannot parse')
+                return None
+        if not phonenumbers.is_valid_number(parsed_phone):
+            print str(phone) +': not number'
+            Util.log.running_logger.warning(str(phone)+' : not number')
+            return None
+        else:
+            return phone            
     

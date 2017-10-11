@@ -11,10 +11,10 @@ from urllib import quote_plus
 from HTMLParser import HTMLParser
 import os
 import csv
+import random
 import unicodecsv
 import json
 import datetime
-import random
 from collections import OrderedDict
 from Common.Logging import Log
 from Common import StatusCode
@@ -52,7 +52,10 @@ geocodeAPI_key = ['AIzaSyCtpPAipfIX-d3W0f4W2fE3lcg9SAoGTUw',
                   'AIzaSyDEjA8msKq-WlkOfEFBElctj3QBB4ASPrQ',
                   'AIzaSyB9--gWXJs1eaFc7x4ibapYMsI9lgySENs',
                   'AIzaSyCr8HcTZ40PklYd_7AdMKu4RdlzRCXeMkQ',
-                  'AIzaSyCDtJ0-wUO5YAOtYr37IfekH4YV44KCN_c']
+                  'AIzaSyCDtJ0-wUO5YAOtYr37IfekH4YV44KCN_c',
+				  'AIzaSyAq9P7eQ2JhdSr1xhhE8L-oYqA8qpIrs3s',
+				  'AIzaSyCcPXyTuOqZNhzvTGF0isbJlprKnM7MaGA',
+				  'AIzaSyDAx2BSzW9iIfy0IYSyHreyXX2AELgKTSQ']
 
 
 
@@ -303,7 +306,7 @@ def getGEOCode(fulladdress,country):
                     'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
                     'x-chrome-uma-enabled': "1"
                 }
-            response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60))
+            response = requests.request("GET", url, headers=headers, params=querystring,timeout=(60,60), verify=False)
             json_location = response.json()
             status = json_location.get('status')
             if status == 'OVER_QUERY_LIMIT':

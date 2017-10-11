@@ -17,7 +17,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from time import sleep
 import urllib3
-from numpy.core.defchararray import index
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -60,13 +59,12 @@ class Unbiased_gb(BaseSite):
             thread1 = threading.Thread(target=self.print_ex,args=(i,))
             thread1.start()'''
         self.__getListVenues()    
+        '''while len(self._url_lstVenues)>0:
+            thread2 = threading.Thread(target=self.__getListVenues, args=(self._url_lstVenues[-1],))
+            self._url_lstVenues.remove(self._url_lstVenues[-1])
+            thread2.start()'''
         
-    '''def print_ex(self,threadname):
-        for i in range(10):
-            self.index__ +=1
-            print 'Thread :'+ str(threadname)+'-'+ str(self.index__) '''
-        
-        
+       
     def addIndex(self):
         index_ = self.index__+1
         self.index__ = index_
@@ -270,7 +268,7 @@ class Unbiased_gb(BaseSite):
             index = self.addIndex()
             
             
-            #ven.is_get_by_address = True
+            ven.is_get_by_address = True
             
             ven.writeToFile(self.folder,index,ven.name.replace('/','-').replace(':',' '),False)
     def __ServicesParser(self,url,xmlServices):        

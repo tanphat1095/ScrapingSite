@@ -6,6 +6,7 @@ from collections import OrderedDict
 import Common.Validation as Validator
 from Common import Util
 from mongoengine.fields import URLField, EmailField
+import phonenumbers
 import codecs
  
 class Venue(object):    
@@ -162,12 +163,29 @@ class Venue(object):
         self.formatted_address = Validator.ReValidString(self.formatted_address)	
         if self.formatted_address != None:
             self.formatted_address = self.formatted_address.replace(',,',',')
-        self.office_number = Validator.ReValidPhone(self.office_number)
+
+        self.office_number = Validator.ReValidPhone(self.office_number)       
+        self.office_number = Validator.ValidPhone(self.office_number,self.country,self.scrape_page)
+
         self.mobile_number = Validator.ReValidPhone(self.mobile_number)
+        self.mobile_number = Validator.ValidPhone(self.mobile_number,self.country,self.scrape_page)
+
         self.office_number2 = Validator.ReValidPhone(self.office_number2)
+        self.office_number2 = Validator.ValidPhone(self.office_number2,self.country,self.scrape_page)
+        if self.office_number2 != None and self.office_number == None:
+            self.office_number = self.office_number2
+            self.office_number2 = None
+
         self.mobile_number2 = Validator.ReValidPhone(self.mobile_number2)          
+        self.mobile_number2 = Validator.ValidPhone(self.mobile_number2,self.country,self.scrape_page)
+        if self.mobile_number2 != None and self.mobile_number == None:
+            self.mobile_number = self.mobile_number2
+            self.mobile_number2 = None
+
         if self.unidentified_phone_numbers != None and len(self.unidentified_phone_numbers) > 0:
             self.unidentified_phone_numbers = [Validator.ReValidPhone(x).strip() for x in self.unidentified_phone_numbers]
+            self.unidentified_phone_numbers = [Validator.ValidPhone(x,self.country,self.scrape_page) for x in self.unidentified_phone_numbers]
+            self.unidentified_phone_numbers = [x for x in self.unidentified_phone_numbers if x != None]
         elif self.unidentified_phone_numbers != None and len(self.unidentified_phone_numbers) == 0:
             self.unidentified_phone_numbers = None
         self.latitude = Validator.ReValidString(self.latitude)
@@ -195,6 +213,13 @@ class Venue(object):
                 self.latitude = None
                 self.longitude = None
         self.opening_hours_raw = Validator.ReValidString(self.opening_hours_raw)
+        if self.pricelist_link != None and isinstance(self.pricelist_link,list) == False:
+            Util.log.running_logger.error('[PriceListLink]: {0} is not List'.format(self.pricelist_link))
+            return False
+        elif self.pricelist_link != None and len(self.pricelist_link) == 0:
+            self.pricelist_link = None
+        elif self.pricelist_link != None:
+            self.pricelist_link = [x.replace(' ','%20') for x in self.pricelist_link]
         return True    
         
     def toOrderDict(self):            
@@ -319,8 +344,8 @@ class Service(object):
     def __reValidInfo(self):  
         self.service_category = Validator.ReValidString(self.service_category)      
         self.service = Validator.ReValidString(self.service)
-        self.description = Validator.ReValidString(self.description)
-        self.service_category = Validator.ReValidString(self.service_category)
+        self.price = Validator.ReValidString(self.price)
+        self.description = Validator.ReValidString(self.description)        
 
         
     def toOrderDict(self):

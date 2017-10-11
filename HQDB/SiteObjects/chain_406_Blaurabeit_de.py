@@ -16,6 +16,9 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import threading
+import phonenumbers
+
+
 
 
 class Blaurabeit_de(BaseSite):
@@ -37,12 +40,13 @@ class Blaurabeit_de(BaseSite):
     outFileSV = ''
     linkIn=[]
     removeName =[':)',':','=))','=']
-    removeDes= ['Mobil','Email','Tel:','Kontaktdaten:','Adresse:','E-Mail:','Email Adresse:']
+    removeDes= ['Email','Tel:','Kontaktdaten:','Adresse:','E-Mail:','Email Adresse:'] #Mobil
     bpfArray =['//div[@class="row row_b row_container clearfix"]',
                '//div[@class="row row_f row_container clearfix"]',
                '//div[@class="row row_p row_container clearfix"]',
                '//div[@class="row row_a row_container clearfix"]']
     index_ =-1
+    runningThread=[]
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
         self._output = output
@@ -56,26 +60,42 @@ class Blaurabeit_de(BaseSite):
         
         with open('Data/Category_chain_406.txt') as f:
             line_ = f.read().splitlines()
-        for line in line_ :
+        '''for line in line_ :
             thread1 = threading.Thread(target=self.__getListVenues,args=(line,))
             thread1.start()
-            print thread1.name +' is running'
+            print thread1.name +' is running'''
+        while len(line_)>0:
+            if self.checkAlive()<5:
+                thread1 = threading.Thread(target=self.__getListVenues,args=(line_[-1],))
+                self.runningThread.append(thread1)
+                line_.remove(line_[-1])
+                thread1.start()
+                #print thread1.name+' is running'
+                #time.sleep(1)
+            else:
+                time.sleep(1)
             
+            
+            
+        '''for line in line_ :
+            self.__getListVenues(line)'''
+        
     def addIndex(self):
         index = self.index_+1
         self.index_= index
         return index    
+    def checkAlive(self):
+        count=0
+        for t in self.runningThread:
+            if t.isAlive():
+                count+=1
+            else:
+                self.runningThread.remove(t)
+        print 'thread running :'+ str(count)
+        return count
     def __getListVenues(self,line):
             
-            
-                #setvenuesperCate= 85
-            
-                '''with open('Data/Category_chain_406.txt') as f:
-                line_ = f.read().splitlines()
-                index =0
-                for line in line_:'''
-                
-                setvenuesperCate= 85
+    
                 
                 countPerCate =0
                 
@@ -87,11 +107,7 @@ class Blaurabeit_de(BaseSite):
                     subcates =  subcateXml.xpath('./ul/li/a')
                     for subcate in subcates:
                         
-                        
-                        if countPerCate == setvenuesperCate:
-                            break
-                        
-                        
+
                         catename =  ''.join(subcate.itertext()).strip()
                         urlcate = subcate.get('href')
                         if urlcate.startswith('/'):
@@ -99,32 +115,26 @@ class Blaurabeit_de(BaseSite):
                         pages = 0
                         while True :
                             print 'Pages : '+str(pages)+'-----'+ cate+'----'+ catename
-                            
-                            if countPerCate == setvenuesperCate:
-                                break
+
                             
                             param= '?radius=21&view=list&interval='+str(pages)
                             xmlDoc = Util.getRequestsXML(urlcate+param,'//div[@class="br_results br_results_dir"]')
                             if xmlDoc==None:
                                 print 'xmlDoc None: continue'
                                 pages+=1
+                                
+                                
+                                time.sleep(60)
                                 continue
+                            
+                            
                             if len(xmlDoc.xpath('./div[@class="br_results br_results_dir"]'))<=0:
                                 print'end category'
                                 break
                             for xpath_ in self.bpfArray:
                                 
-                                
-                                if countPerCate == setvenuesperCate :
-                                    break
-                                
                                 elementIems = xmlDoc.xpath(xpath_)
                                 for ele in elementIems:
-                                    
-                                    
-                                    if countPerCate == setvenuesperCate:
-                                        break
-                                    
                                     type_hqdb = ele.find('.//div[@class="col-inner"]/div')
                                     if xpath_ =='//div[@class="row row_p row_container clearfix"]':
                                         hqdb_type ="featured"
@@ -143,11 +153,12 @@ class Blaurabeit_de(BaseSite):
                                             ven.writeToFile(self.folder, index, self.validateFilename(ven.name), False)
                                             #self.index_+=1
                                             countPerCate+=1
-                                            time.sleep(2)    
+                                            
                             pages+=1
-  
+                else:
+                    time.sleep(600)
     def __VenueParser(self,hqdb_type, linkItems,subcate,cate):    
-            #linkItems ='https://www.blauarbeit.de/p/buchhaltung/berlin/cornelia_wegner/230862.htm'
+            #linkItems ='https://www.blauarbeit.de/p/reinigungsservice/schwarzheide/rene_nowak/11894.htm'
             existing=[x for x in self.linkIn if linkItems in x]
             if len(existing)>0:
                 print 'This venue exist in list'
@@ -239,9 +250,9 @@ class Blaurabeit_de(BaseSite):
                         if key_ =='Tel:':
                             values_ = values_.replace('/', '').replace(' ', '').replace('Tel', '')
                             if values_.startswith('01')| values_.startswith('+0041')| values_.startswith('0041'):
-                                ven.mobile_number = self.validatePhone(values_)
+                                ven.mobile_number = self.validatePhone__(self.validatePhone(values_), 'de')
                             else:
-                                ven.office_number = self.validatePhone(values_)
+                                ven.office_number = self.validatePhone__(self.validatePhone(values_), 'de')
                             
                     img_ = leftInfo.find('./div/div[@class="profile_top_right"]/img')
                     if img_!=None:
@@ -293,21 +304,17 @@ class Blaurabeit_de(BaseSite):
                         
                     if ven.formatted_address!=None:
                         address_ = ven.formatted_address
+                        
                     
-                    '''if len(address_.strip())>5:
-                        (ven.latitude,ven.longitude)  = self.getLatlng(address_,'DE') #script_
-                    
-                    
-                        if ven.latitude== None and ven.longitude == None:
-                            zipFrom = self.findZipcode(address_)
-                            if zipFrom!=None:
-                                (ven.latitude,ven.longitude) = self.getLatlng(zipFrom, 'DE')
-                                if ven.latitude ==None and ven.longitude==None:
-                                    Util.log.running_logger.info(address_+' : cannot get GEO code')
-                                else:
-                                    Util.log.running_logger.info(address_+' : cannot get GEO code')
-                            else:
-                                Util.log.running_logger.info(address_+' : cannot get GEO code')'''
+                    zipFrom = self.findZipcode(address_)
+                    if zipFrom!=None:
+                        (ven.latitude,ven.longitude) = self.getLatlng(zipFrom, 'DE')
+                        if ven.latitude ==None and ven.longitude==None:
+                            Util.log.running_logger.info(address_+' : cannot get GEO code')
+                        else:
+                            Util.log.running_logger.info(address_+' : cannot get GEO code')
+                    else:
+                        Util.log.running_logger.info(address_+' : cannot get GEO code')
                         
                         
                     redirecPhotos= rightInfo.find('./nav/div/ul/li[@class="tabOff tab_foto"]/a')
@@ -488,7 +495,18 @@ class Blaurabeit_de(BaseSite):
         for i in range(0,len(findchar)):
             if des.find('[if')>=0:
                 remove_ = des[des.find('[if'):des.find('endif]')+len('endif]')]
-                des = des.replace(remove_,'')
+                des = des.replace(remove_,'')          
+        findStart = self.findAllPositionCharinString('/* Font Definitions */', des)
+        while len(findStart)>1:
+            findStart = self.findAllPositionCharinString('/* Font Definitions */', des)
+            findend= self.findAllPositionCharinString('ul \t{margin-bottom:0cm;}', des)
+            if len(findend)==0:
+                findend= self.findAllPositionCharinString('page:Section1;}', des)
+            if len(findend)==0:
+                    print 'can found end point'
+                    break
+            remove_2 = des[findStart[0]:findend[0]+len('ul \t{margin-bottom:0cm;}')]
+            des =  des.replace(remove_2,'')
         return des.replace('�','').replace('-',' ').replace('..',' ').replace('__','')
     def getLatlng(self,address,countr):
         if address.strip()=='':
@@ -562,6 +580,16 @@ class Blaurabeit_de(BaseSite):
             return city
         else:
             return None
-        
-                
-    
+    def validatePhone__(self,phone,country='FR'):        
+        try:
+            parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
+        except phonenumbers.phonenumberutil.NumberParseException as error: 
+                print str(phone) +' can not parse'
+                Util.log.running_logger.warning(str(phone)+' : cannot parse')
+                return None
+        if not phonenumbers.is_valid_number(parsed_phone):
+            print str(phone) +': not number'
+            Util.log.running_logger.warning(str(phone)+' : not number')
+            return None
+        else:
+            return phone           

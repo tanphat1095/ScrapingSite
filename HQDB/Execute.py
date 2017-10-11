@@ -7,6 +7,7 @@ import time
 from Common.Working import Working
 
 
+
 index_ = 0
 def main():
     '''
@@ -26,10 +27,11 @@ def main():
     working.do(["", "url=https://www.meilleur-garagiste.com"]) #387
     #working.do(["", "url=http://www.drivingschoolsfinder.co.uk/"]) # 391
     #working.do(["", "url=http://www.architecturalindex.com/"]) #399
-    #working.do(["", "url=http://www.homewise.ie"]) #403
     #working.do(["", "url=https://www.blauarbeit.de"]) #406
     print "DONE"
-    
+
+
+
 def loops(threadname):
     for i in range(0,10):
         
@@ -46,15 +48,15 @@ def test(country):
     files.close()
     print result+'\n'
     return result
+def parse_(string):
+    try:
+        return int(string)
+    except Exception, ex:
+        print 'Ex1'
+def cfscrape(url):
+    scraper = cfscrape.create_scraper()
 if __name__ == '__main__':
-    #Util.checkAPI()
+    #clickleft(103,164)
     main()
-    #for i in range(100):
-    #    thread1 = threading.Thread(target=loops,args=(str(i),))
-    #    print thread1.name
-    #    thread1.start()
-    listCountry =['UK','FR','BM','NE','GF','IT','SP','CZ','PL']
-    for coun in range(0,len(listCountry)):
-        thread1 = threading.Thread(target=test,args=(listCountry[coun],))
-        thread1.start()                                 
+                              
                                    
