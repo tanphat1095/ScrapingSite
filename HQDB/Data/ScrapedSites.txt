@@ -7,3 +7,4 @@ http://www.drivingschoolsfinder.co.uk/; SiteObjects.chain_391_Drivingfschoolsfin
 http://www.architecturalindex.com/; SiteObjects.chain_399_Architecturalindex_gb; Architecturalindex_gb
 http://www.homewise.ie; SiteObjects.chain_403_Homewise_gb; Homewise_gb
 https://www.blauarbeit.de; SiteObjects.chain_406_Blaurabeit_de_; Blaurabeit_de
+https://yoganearby.com; SiteObjects.chain_417_Yoganearby_gb; Yoganearby_gb

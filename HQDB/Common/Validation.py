@@ -9,6 +9,7 @@ import geocoder
 from validate_email import validate_email
 import re
 from mongoengine.fields import URLField, EmailField
+import phonenumbers
 
 
 with open('Data/Countries.csv', 'r') as f:
@@ -99,7 +100,7 @@ def ReValidPhone(phone,type='phone'):
             return None
         phone = ReValidString(phone)
         if phone != None:
-            phone = Util.removeSpecialChar(phone,type).replace(' ','')
+            phone = Util.removeSpecialChar(phone,type).replace(' ','')            
         if phone == '':
             return None
         return phone
@@ -211,5 +212,19 @@ def RevalidURL(url):
         return True
     except:
         return False
+
+def ValidPhone(Phone,country,url):
+    if Phone != None:
+        try:
+            parsed_phone = phonenumbers.parse(Phone, country.upper(), True)
+            valid_phone = phonenumbers.is_valid_number(parsed_phone)                                                               
+            if valid_phone == False:
+                Util.log.running_logger.warning('[Phone Invalid]: {0}: {1}'.format(url,Phone))                                    
+                return None
+            return Phone
+        except:
+            Util.log.running_logger.error('[Phone Parse]: {0}: {1}'.format(url,Phone))
+            return  None
+    return None
     
     

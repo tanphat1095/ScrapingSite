@@ -55,7 +55,7 @@ class Blaurabeit_de(BaseSite):
     def __getListVenues(self):
             
             
-            setvenuesperCate= 834
+            setvenuesperCate= 50000 #834
             
             with open('Data/Category_chain_406.txt') as f:
                 line_ = f.read().splitlines()
@@ -68,61 +68,67 @@ class Blaurabeit_de(BaseSite):
                 cateLink = cateArr[1]
                 subcateXml = Util.getRequestsXML(cateLink,'//div[@class="box_w box_r"]/ul/li/ul')
                 if subcateXml!=None:
+
                     subcates =  subcateXml.xpath('./ul/li/a')
                     for subcate in subcates:
                         
                         
-                        if countPerCate == setvenuesperCate:
-                            break
+                        try:
+                        
+                            if countPerCate >= setvenuesperCate:
+                                break
                         
                         
-                        catename =  ''.join(subcate.itertext()).strip()
-                        urlcate = subcate.get('href')
-                        if urlcate.startswith('/'):
-                            urlcate =  self.__url__+ urlcate
-                        pages = 0
-                        while True :
+                            catename =  ''.join(subcate.itertext()).strip()
+                            urlcate = subcate.get('href')
+                            if urlcate.startswith('/'):
+                                urlcate =  self.__url__+ urlcate
+                            pages = 0
+                            while True :
                             
                             
-                            if countPerCate == setvenuesperCate:
-                                break
-                            
-                            param= '?radius=21&view=list&interval='+str(pages)
-                            xmlDoc = Util.getRequestsXML(urlcate+param,'//div[@class="br_results br_results_dir"]')
-                            if len(xmlDoc.xpath('./div[@class="br_results br_results_dir"]'))<=0:
-                                break
-                            for xpath_ in self.bpfArray:
-                                
-                                
-                                if countPerCate == setvenuesperCate :
+                                if countPerCate >= setvenuesperCate:
                                     break
+                            
+                                param= '?radius=21&view=list&interval='+str(pages)
+                                xmlDoc = Util.getRequestsXML(urlcate+param,'//div[@class="br_results br_results_dir"]')
+                                if len(xmlDoc.xpath('./div[@class="br_results br_results_dir"]'))<=0:
+                                    break
+                                for xpath_ in self.bpfArray:
                                 
-                                elementIems = xmlDoc.xpath(xpath_)
-                                for ele in elementIems:
-                                    
-                                    
-                                    if countPerCate == setvenuesperCate:
+                                
+                                    if countPerCate >= setvenuesperCate :
                                         break
+                                
+                                    elementIems = xmlDoc.xpath(xpath_)
+                                    for ele in elementIems:
                                     
-                                    type_hqdb = ele.find('.//div[@class="col-inner"]/div')
-                                    if xpath_ =='//div[@class="row row_p row_container clearfix"]':
-                                        hqdb_type ="featured"
-                                    else:
-                                        #hqdb_type =  ''.join(type_hqdb.itertext()).strip()
-                                        hqdb_type ='none'
-                                    linkItems = ele.find('.//div[@class="name"]//a').get('href')
-                                    if linkItems.startswith('/'):
-                                        linkItems= self.__url__+linkItems
-                                        print 'Scrapping: '+ linkItems
-                                        time.sleep(1)
-                                        ven =    self.__VenueParser(hqdb_type, linkItems,catename,cate)
-                                        if ven!=None:
-                                            print 'Writing index: '+str(index)
-                                            ven.writeToFile(self.folder, index, self.validateFilename(ven.name), False)
-                                            index+=1
-                                            countPerCate+=1       
-                            pages+=1
-  
+                                    
+                                        if countPerCate >= setvenuesperCate:
+                                            break
+                                    
+                                        #type_hqdb = ele.find('.//div[@class="col-inner"]/div')
+                                        if xpath_ =='//div[@class="row row_p row_container clearfix"]':
+                                            hqdb_type ="featured"
+                                        else:
+                                            #hqdb_type =  ''.join(type_hqdb.itertext()).strip()
+                                            hqdb_type ='none'
+                                        linkItems = ele.find('.//div[@class="name"]//a').get('href')
+                                        if linkItems.startswith('/'):
+                                            linkItems= self.__url__+linkItems
+                                            print 'Scrapping: '+ linkItems
+                                            time.sleep(1)
+                                            ven =    self.__VenueParser(hqdb_type, linkItems,catename,cate)
+                                            if ven!=None:
+                                                print 'Writing index: '+str(index)
+                                                ven.writeToFile(self.folder, index, self.validateFilename(ven.name), False)
+                                                index+=1
+                                                countPerCate+=1       
+                                pages+=1
+                        except Exception,ex:
+                            print ex
+                            continue
+                            
     def __VenueParser(self,hqdb_type, linkItems,subcate,cate):    
             #linkItems ='https://www.blauarbeit.de/p/buchhaltung/berlin/cornelia_wegner/230862.htm'
             existing=[x for x in self.linkIn if linkItems in x]
@@ -225,8 +231,11 @@ class Blaurabeit_de(BaseSite):
                     rating = leftInfo.xpath('.//section[@id="ratings"]/div')
                     if len(rating)>=2:
                         rating1 = ''.join(rating[0].itertext()).strip().split()[1]
-                        rating2 = ''.join(rating[1].itertext()).strip().split()[0]
-                        rating2 =  rating2.split('/')[0].replace(',','.')
+                        rating2 = ''.join(rating[1].itertext()).strip()
+                        if len(rating2)>0:
+                            rating2 = rating2.split()[0]
+                            if rating2.find('/')!=-1:
+                                rating2 =  rating2.split('/')[0].replace(',','.')
                         try:
                             float(rating2)
                         except Exception,ex:
