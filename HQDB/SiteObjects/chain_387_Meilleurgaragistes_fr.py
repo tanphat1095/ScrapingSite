@@ -215,7 +215,7 @@ class Meilleurgaragistes_fr(BaseSite):
             img_link_arr = []
             desc_ = self.replace__(desc_)
             desc_ = self.replaceSame(desc_, '||', '|').replace('|',' | ')
-            ven.description =desc_.replace('|', '\n')
+            ven.description =desc_
             img_link = xmlBody.find('.//div[@class="realisations"]/img')
             if img_link!=None:
                 temp_img  =   ven.img_link = self.__url__+ img_link.get('src')

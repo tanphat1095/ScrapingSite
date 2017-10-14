@@ -41,6 +41,7 @@ class Blaurabeit_de(BaseSite):
                '//div[@class="row row_f row_container clearfix"]',
                '//div[@class="row row_p row_container clearfix"]',
                '//div[@class="row row_a row_container clearfix"]']
+    regex_= ['(BP[\s][\d]{1,5})','(BP[\d]{1,5})','(BP[\s][\d]{1,5})','(B.P.[\s][\d]{1,5})','(CS[\s][\d]{1,5})','(CS[\d]{1,5})','([\d]{4,20})']
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
         self._output = output
@@ -117,7 +118,7 @@ class Blaurabeit_de(BaseSite):
                                         if linkItems.startswith('/'):
                                             linkItems= self.__url__+linkItems
                                             print 'Scrapping: '+ linkItems
-                                            time.sleep(1)
+                                            #time.sleep(1)
                                             ven =    self.__VenueParser(hqdb_type, linkItems,catename,cate)
                                             if ven!=None:
                                                 print 'Writing index: '+str(index)
@@ -190,6 +191,7 @@ class Blaurabeit_de(BaseSite):
                         if key_ =='Addresse:':
                             address_ =  values_
                             (ven.street,ven.city,ven.zipcode) = self.processAddress(address_)
+                            ven.street = self.validateStreet2(ven.street)
                             #ven.formatted_address = address_
                             if ven.city!=None:
                                 checkCity = ven.city.split()
@@ -291,7 +293,7 @@ class Blaurabeit_de(BaseSite):
                         linkPhotos =  redirecPhotos.get('href')
                         if linkPhotos.startswith('/'):
                             linkPhotos = self.__url__+ linkPhotos
-                        time.sleep(1)
+                        #time.sleep(1)
                         xpathPhotos =  Util.getRequestsXML(linkPhotos, '//div[@class="portfolio thumbs"]/a')
                         if xpathPhotos!=None:
                             listImg = xpathPhotos.xpath('./a')
@@ -565,4 +567,9 @@ class Blaurabeit_de(BaseSite):
             return None
         else:
             return phone            
-    
+    def validateStreet2(self, street):
+        for reg in self.regex_:
+            results = re.search(reg, street, flags=0)
+            if results!=None:
+                street = street.replace(results.group(0),'')
+        return street
