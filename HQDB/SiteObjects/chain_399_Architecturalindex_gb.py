@@ -9,8 +9,11 @@ import re
 import json
 import urllib3
 import requests
+import threading
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import time
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 class Architecturalindex_gb(BaseSite):
     '''
     Get information from ""
@@ -29,7 +32,8 @@ class Architecturalindex_gb(BaseSite):
     outFileVN = ''
     outFileSV = ''
     list_url= []
-    
+    runningThread =[]
+    index =-1
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
         self._output = output
@@ -45,6 +49,18 @@ class Architecturalindex_gb(BaseSite):
         '''
         self.__getListVenues()
     
+    def addIndex(self):
+        index = self.index+1
+        self.index = index
+        return index
+    def checkAlive(self):
+        count = 0
+        for t in self.runningThread:
+            if t.isAlive():
+                count+=1
+            else:
+                self.runningThread.remove(t)
+        return count
     def __getListVenues(self):
         index =0
         print "Getting list of Venues"
@@ -73,30 +89,41 @@ class Architecturalindex_gb(BaseSite):
                         curr = pages
                         items =  content__.xpath('//div[@class="search_result"]')
                         
-                        for item in items:
+                        '''for item in items:
                             ven = self.__VenueParser(item,index)
                             if ven!=None:
                                 self.list_url.append(ven.scrape_page)
                                 ven.adid = item.get('id')
                                 ven.writeToFile(self.folder,index,ven.name.replace(':',''),False)
                                 index+=1
+                                '''
+                                
+                        while len(items)> 0:
+                            if self.checkAlive()<6:
+                                item =  items[-1]
+                                index+=1
+                                thread1 = threading.Thread(target=self.__VenueParser, args=(item,index))
+                                items.remove(item)
+                                self.runningThread.append(thread1)
+                                thread1.start()
                         if curr == total:
                             break
                     pages+=1
                     
     def __VenueParser(self, xmlE,index):        
-        print 'Scrapping: '
+        #print 'Scrapping: '
         ven  = Venue()
+        ven.adid = xmlE.get('id')
         ven.category ='architecural technologist'
         photos = xmlE.find('./div[@class="search_result_photo"]/div[@class="photo"]/a')
         ven.venue_images = self.__url__+ photos.find('./img').get('src')
         ven.scrape_page = self.__url__+ photos.get('href')
-        print str(index)+' >>'+ ven.scrape_page
+        #print str(index)+' >>'+ ven.scrape_page
         existing=[x for x in self.list_url if ven.scrape_page in x]
         if len(existing)>0:
             print 'This venues exist in list'
-            return None
-        
+            return 
+        self.list_url.append(ven.scrape_page)
         details_ =  xmlE.find('.//div[@class="search_result_details"]')
         ven.name =  details_.find('./div[@class="title"]/h3/a').text
         contacts_ = details_.find('./div[@class="contact"]').text
@@ -104,6 +131,8 @@ class Architecturalindex_gb(BaseSite):
         contact__ = contacts_.split(',')
         if len(contact__)>=2:
             ven.zipcode = contact__[len(contact__)-1]
+            if ven.zipcode!=None:
+                ven.zipcode = self.check_zip(ven.zipcode)
             ven.city = contact__[len(contact__)-2]
             
         #scraping details ____ 
@@ -197,17 +226,22 @@ class Architecturalindex_gb(BaseSite):
             ven.services = sers
             ven.pricelist_link = [ven.scrape_page]
             ven.country ='gb'
-            if ven.street!=None:
+            '''if ven.street!=None:
                 add_ = ven.street+', '+ven.city+', '+ ven.zipcode
             else:
                 add_ = ven.city+', '+ ven.zipcode
-            (ven.latitude,ven.longitude) = self.getLatlng(add_, 'UK')
-            
-            
-            
+            #(ven.latitude,ven.longitude) = self.getLatlng(add_, 'UK')'''
+            indexc = self.addIndex()
+            try:
+                print 'Writing index: '+ str(indexc)
+                ven.writeToFile(self.folder,indexc,ven.name.replace(':',''),False)
+            #return ven
+            except Exception,ex:
+                print ex
+                return
         else:
-            return None 
-        return ven
+            return  
+        
     
     
     def getLatlng(self,address,countr):
@@ -248,3 +282,10 @@ class Architecturalindex_gb(BaseSite):
         print'*'*25
         results = Util.getRequestsXML(url,xpath_)
         return results
+    def check_zip(self,string):
+        regex ='((?:[gG][iI][rR] {0,}0[aA]{2})|(?:(?:(?:[a-pr-uwyzA-PR-UWYZ][a-hk-yA-HK-Y]?[0-9][0-9]?)|(?:(?:[a-pr-uwyzA-PR-UWYZ][0-9][a-hjkstuwA-HJKSTUW])|(?:[a-pr-uwyzA-PR-UWYZ][a-hk-yA-HK-Y][0-9][abehmnprv-yABEHMNPRV-Y]))) {0,}[0-9][abd-hjlnp-uw-zABD-HJLNP-UW-Z]{2}))'
+        result = re.search(regex, string, flags=0)
+        if result!=None:
+            if string.strip() == result.group(0).strip():
+                return string
+        return None

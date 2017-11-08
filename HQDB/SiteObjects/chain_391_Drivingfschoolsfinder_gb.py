@@ -147,7 +147,7 @@ class Drivingfschoolsfinder_gb(BaseSite):
                 zipcode = address[len(address)-1]
                 street__ = street.upper()
                 if street__.find('PO BOX')==-1:
-                    ven.street = street.replace('n/a', '').replace('***', '').replace('6 weldon place croy', '').replace('cumbernauld41 napier square bellshill ml4 1tb', '')
+                    ven.street = street.replace('n/a', '').replace('***', '').replace('6 weldon place croy', '').replace('cumbernauld41 napier square bellshill ml4 1tb', '').replace('P.O. Box 1048', '')
                 if ven.street =='-':
                     ven.street = None
                 ven.zipcode=  self.validateZipcode(zipcode)

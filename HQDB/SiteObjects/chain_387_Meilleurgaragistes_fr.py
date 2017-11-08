@@ -10,6 +10,7 @@ from array import array
 import urllib3
 import requests
 from time import sleep
+from pip._vendor.requests.api import request
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -69,11 +70,115 @@ class Meilleurgaragistes_fr(BaseSite):
         print str(count) +' thread is runing'
         return count
     
+    
+    def getUrlList(self):
+        xmlDoc = Util.getRequestsXML('https://www.meilleur-garagiste.com/france/', '//ul[@class="collection"]')
+        if xmlDoc!=None:
+            xmlDoc = xmlDoc.xpath('./ul[@class="collection"]')
+            if len(xmlDoc)>=2:
+                xmlDoc_1 = xmlDoc[1].xpath('./li/a')
+                for i in xmlDoc_1:
+                    print '>>>>>>'+i.text +'<<<<<<<<<'
+                    xmlDoc2 = Util.getRequestsXML(self.__url__+ i.get('href'),'//ul[@class="collection"]/li/a')
+                    xmlListlink = xmlDoc2.xpath('./a')
+                    for link in xmlListlink:
+                        #print link.text
+                        index =1
+                        venuesCount = 0
+                        url = self.__url__+ link.get('href')
+                        response = requests.get(url)
+                        url =response.url
+                        while True :
+                            linkIn__ =  url[0:-4]+str(index)+'.html'
+                            xmlvenues_ = Util.getRequestsXML(linkIn__, '/html')
+                            print linkIn__
+                            totalVenues = xmlvenues_.find('.//title').text
+                            totalVenues =totalVenues[totalVenues.find('Les')+len('Les'):totalVenues.find('meilleurs')]
+                            if totalVenues.strip() =='':
+                                totalVenues =0
+                            else:
+                                try:
+                                    totalVenues = int(totalVenues)
+                                except Exception,ex:
+                                    totalVenues =0
+                            xmlVenues = xmlvenues_.xpath('//div[@class="liste-entreprise"]')
+                            index+=1
+                            listperpages = xmlVenues[0].xpath('//a/h2/parent::a')
+                            
+                            for item in listperpages:
+                                link_ = self.__url__+item.get('href')
+                                #print item.find('./h2').text
+                                existing=[x for x in self.listlink if link_ in x]
+                                if len(existing)<=0:
+                                    self.listlink.append(link_)
+                                else:
+                                    print'Exsit in list'
+                                venuesCount+=1
+                            print 'Found: '+ str(len(self.listlink))
+                            if venuesCount>= totalVenues:
+                                break
+                            
+                            
+                            
+                xmlDoc_2 = xmlDoc[0].xpath('./li/a')
+                for i_ in xmlDoc_2 :
+                    print '>>>>>>'+i_.text.strip()+'<<<<<'
+                    #duongdan = self.__url__+ i_.get('href')
+                    xmlChildPages = Util.getRequestsXML(self.__url__+i_.get('href'), '//ul[@class="collection"]')
+                    if len(xmlChildPages)!=None:
+                        items = xmlChildPages.xpath('./ul[@class="collection"]')
+                        items = items[0].xpath('./li/a')
+                        for item_ in items :
+                            cates = Util.getRequestsXML(self.__url__+item_.get('href'), '//ul[@class="collection"]/li/a')
+                            cates = cates.xpath('./a')
+                            for cate in cates :
+                                xmlNode =  Util.getRequestsXML(self.__url__+cate.get('href'), '//ul[@class="collection"]/li/a')
+                                xmlNode = xmlNode.xpath('./a')
+                                for node in xmlNode:
+                                    #print node.text
+                                    index_2 = 1
+                                    vnCount =0
+                                    url__ = self.__url__+ node.get('href')
+                                    response__ = requests.get(url__)
+                                    url__ = response__.url
+                                    while True:
+                                        
+                                        
+                                        url__In = url__[0:-4]+ str(index_2)+'.html'
+                                        print url__In
+                                        xmlVenues_2 = Util.getRequestsXML(url__In, '/html')
+                                        
+                                      
+                                        
+                                        total_Venues =  xmlVenues_2.find('.//title').text
+                                        total_Venues =total_Venues[total_Venues.find('Les')+len('Les'):total_Venues.find('meilleurs')]
+                                        if total_Venues.strip()=='':
+                                            total_Venues =0
+                                        else:
+                                            try:
+                                                total_Venues = int(total_Venues)
+                                            except Exception,ex:
+                                                total_Venues
+                                        xmlVen = xmlVenues_2.xpath('//div[@class="liste-entreprise"]')
+                                        index_2+=1
+                                        listperPages2 = xmlVen[0].xpath('//a/h2/parent::a')
+                                        for item__ in listperPages2:
+                                            link__ = self.__url__+ item__.get('href')
+                                            print item__.find('./h2').text
+                                            existing_2=[x for x in self.listlink if link__ in x]
+                                            if len(existing_2)<=0:
+                                                self.listlink.append(link__)
+                                            else:
+                                                print   'Exist in list'  
+                                            vnCount+=1
+                                        print 'Found: '+ str(len(self.listlink))
+                                        if vnCount>= total_Venues:
+                                            break
     def __getListVenues(self):
-        print "Getting list of Venues"
-        index = 1
-        index_ =0
-        while True :
+        #print "Getting list of Venues"
+        #index = 1
+        #index_ =0
+        '''while True :
             print 'pages: '+ str(index)
             xmlDoc = self.getXML('//div[@class="liste-entreprise"]', index) #
             #print ET.dump(xmlDoc)
@@ -88,7 +193,13 @@ class Meilleurgaragistes_fr(BaseSite):
                 
             else:
                 print 'End'
-                break
+                break'''
+        
+        
+        
+        
+        
+        self.getUrlList()
         print 'Total: '+str(len(self.listlink))+' url found'
         while len(self.listlink)>0:
             print str(len(self.listlink)) +' link exist'
@@ -200,9 +311,9 @@ class Meilleurgaragistes_fr(BaseSite):
                     add_ = ven.city+', '+ven.zipcode
             else:
                 add_ = None      
-            (ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
+            '''(ven.latitude,ven.longitude) = self.getLatlng(add_, 'FR')
             if ven.latitude == None and ven.longitude ==None:
-                Util.log.coordinate_logger.error(ven.scrape_page+' : Cannot get GEO code')
+                Util.log.coordinate_logger.error(ven.scrape_page+' : Cannot get GEO code')'''
             self.link_venues.append(link)
             ven.country='fr'
             desc = xmlBody.find('.//p[@id="description"]')
@@ -235,7 +346,7 @@ class Meilleurgaragistes_fr(BaseSite):
             if featureAd!=None:
                 text = featureAd.text.replace('é','e')
                 if text =='Entreprise verifiee ':
-                    ven.hqdb_featured_ad_type ='Featured'
+                    ven.hqdb_featured_ad_type ='featured'
             if ven.zipcode !=None  and len(ven.zipcode)>0 and ven.zipcode.isdigit() :
                 zip_ = int(ven.zipcode)
                 if zip_ <1000 :

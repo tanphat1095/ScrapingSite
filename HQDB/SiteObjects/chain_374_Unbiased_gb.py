@@ -54,10 +54,15 @@ class Unbiased_gb(BaseSite):
     def doWork(self):
   
         self.phoneCodeList = Util.getPhoneCodeList()
-   
+        #phone  = self.validatePhone('0798-4301242')
+        #print self.validatePhone__(phone, 'gb')
         '''for i in range(10):
             thread1 = threading.Thread(target=self.print_ex,args=(i,))
             thread1.start()'''
+        
+       
+       
+        
         self.__getListVenues()    
         '''while len(self._url_lstVenues)>0:
             thread2 = threading.Thread(target=self.__getListVenues, args=(self._url_lstVenues[-1],))
@@ -112,7 +117,7 @@ class Unbiased_gb(BaseSite):
                     #for items in brands:
                     while len(brands)>0:   
                         #ven = self.__VenueParser(items,hash)
-                        if self.checkAlive()<5:
+                        if self.checkAlive()<6:
                             items =  brands[-1]
                             thread1 = threading.Thread(target=self.__VenueParser,args=(items,hash,))
                             #print thread1.name+' starting'
@@ -164,7 +169,7 @@ class Unbiased_gb(BaseSite):
          ven.scrape_page = url
          #ven.pricelist_link = [url]
          self.list_url.append(url__)
-         #url ='https://www.unbiased.co.uk/profile/financial-adviser/stiles-company-financial-services-petersfield-ltd-511274'
+         #url ='https://www.unbiased.co.uk/profile/financial-adviser/throgmorton-private-capital-ltd-513577?hash=8953724'
          xmlRequest = Util.getRequestsXML(url,'//div[@class="container-fluid"]')
          if xmlRequest !=None:
             stringAddress = xmlRequest.find('.//span[@class="profile-meta__address"]').text.replace(',,',',')
@@ -194,21 +199,25 @@ class Unbiased_gb(BaseSite):
             if ven.formatted_address.endswith(','):
                 ven.formatted_address = ven.formatted_address[0:len(ven.formatted_address)-2]
             phoneLabel = xmlRequest.xpath('.//span[@class="phone-label"]/parent::a')
-         
+            
             if len(phoneLabel)>0:
                 for phone_ in phoneLabel:
-                    phone= phone_.get('data-phone').replace('\n','').replace(' ','')
+                    phone= phone_.get('data-phone').replace('\n','').replace(' ','').replace('-','')
+                    phone__ = phone_.get('data-phone').replace('\n','')
                     if phone.find('Shownumber')<=0:
+                        Util.log.running_logger.info('[phone number:]'+ str(phone__))
                         phone = self.validatePhone(phone)
                         for rePhone  in self.listPhoneremove:
                             if phone == rePhone:
                                 phone = None
                         if phone!=None:
-                            if phone.startswith('07'):
-                                ven.mobile_number = phone
+                            if phone.startswith('07') or phone.startswith('+447'):
+                                ven.mobile_number = self.validatePhone__(phone, ven.country)
                             else:
-                                ven.office_number = phone
-                            break
+                                ven.office_number = self.validatePhone__(phone, ven.country)
+                            
+                        break
+                        
             services = xmlRequest.find('.//ul[@class="advice-area__level-one"]')
             if services!=None:
                 list_ser = services.xpath('./li')
@@ -247,10 +256,21 @@ class Unbiased_gb(BaseSite):
                 values_fol =  fol.get('class')
                 if values_fol =='icon-soc-tw':
                     ven.twitter = fol.find('./a').get('href')
+                    if ven.twitter!=None:
+                        if ven.twitter.startswith('http://'):
+                            ven.twitter=   ven.twitter.replace('http://','https://')
                 if values_fol =='icon-soc-www':
                     ven.business_website = fol.find('./a').get('href')
                 if values_fol =='icon-soc-fb':
                     ven.facebook = fol.find('./a').get('href')
+                    
+                    #ven.facebook = 'http://abc.com/aaa'
+                    
+                    if ven.facebook!=None:
+                        if ven.facebook.startswith('http://'):
+                            ven.facebook = ven.facebook.replace('http://','https://')
+                        if ven.facebook.find('facebook.com')==-1:
+                            ven.facebook = None
                 
                         
             # description feedback 3
@@ -268,7 +288,7 @@ class Unbiased_gb(BaseSite):
             index = self.addIndex()
             
             
-            ven.is_get_by_address = True
+            #ven.is_get_by_address = True
             
             ven.writeToFile(self.folder,index,ven.name.replace('/','-').replace(':',' '),False)
     def __ServicesParser(self,url,xmlServices):        
@@ -308,28 +328,16 @@ class Unbiased_gb(BaseSite):
         response = requests.request("GET", url, headers=headers,timeout=(60,60),verify=False)
         return response.content
     def validatePhone(self,phone):
-        if phone.isdigit():
+        
             
             if phone.startswith('0800') | phone.startswith('800') :
                 return None
-            if phone.startswith('44') and len(phone) == 12:
+            if phone.startswith('44') :
                 return '+'+ phone
-            if phone.startswith('+44') and len(phone)==13:
+            if phone.startswith('+44'):
                 return phone
-            if phone.startswith('0') and len(phone) ==11:
-                return phone
-            else:
-                if phone.startswith('44'):
-                    return None
-                if phone.startswith('+44'):
-                    return None
-                if phone.startswith('0'):
-                    return None
-                else:
-                    return phone
-        else:
-            phone = None
-        return phone
+            if phone.startswith('0') :
+                return phone     
     def checkPhone(self, phone):
         _phone =''
         try:
@@ -363,10 +371,12 @@ class Unbiased_gb(BaseSite):
         try:
             parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
         except phonenumbers.phonenumberutil.NumberParseException as error: 
-                print phone +' can not parse'
+                print str(phone) +' can not parse'
+                Util.log.running_logger.error(phone+' can not parse')
                 return None
         if not phonenumbers.is_valid_number(parsed_phone):
-            print phone +': not number'
+            Util.log.running_logger.error(phone+' not number')
+            print str(phone) +': not number'
             return None
         else:
             return phone
