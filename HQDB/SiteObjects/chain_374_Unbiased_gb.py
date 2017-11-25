@@ -63,20 +63,52 @@ class Unbiased_gb(BaseSite):
        
        
         
-        self.__getListVenues()    
+        self.__getListVenues()
+        #self.Object_to_test()
+        self.checkduplicate()
+        for ven in self.vens:
+            index__ = self.addIndex()
+            ven.writeToFile(self.folder,index__,ven.name.replace('/','-').replace(':',' '),False)
         '''while len(self._url_lstVenues)>0:
             thread2 = threading.Thread(target=self.__getListVenues, args=(self._url_lstVenues[-1],))
             self._url_lstVenues.remove(self._url_lstVenues[-1])
             thread2.start()'''
-        
-       
+    def Object_to_test(self):
+        for i in range(0, len(self.vens)):
+            if i > 10 :
+                ven =  self.vens[i-10]
+                ven.office_number = None
+                ven.office_number2 =None
+                ven.mobile_number = None
+                ven.mobile_number2 = None
+            else:
+                ven =  self.vens[i]
+            self.vens[i] = ven
+    def checkduplicate(self):
+        dupList= []
+        for i in range(0,len(self.vens)):
+            ven_i  = self.vens[i]
+            for j in range(i+1,len(self.vens)):
+                ven_j = self.vens[j]
+                if ven_i.name == ven_j.name and ven_i.formatted_address == ven_j.formatted_address:
+                    if ven_i.office_number ==None and ven_i.office_number2 == None and ven_i.mobile_number ==None and ven_i.mobile_number2==None:
+                        if ven_j.office_number ==None and ven_j.office_number2 == None and ven_j.mobile_number ==None and ven_j.mobile_number2==None:
+                            dupList.append(ven_i)
+                        else:
+                            dupList.append(ven_j)
+        for dup in dupList:
+            try:
+                self.vens.remove(dup)
+            except Exception,ex:
+                print ex
+                continue
     def addIndex(self):
         index_ = self.index__+1
         self.index__ = index_
         return index_
     def __getListVenues(self):
         print "Getting list of Venues"
-        files_ = open('Data/EngCity.txt','r')
+        files_ = open('Data/EngCity2.txt','r')
         postcode = files_.read().splitlines()
         print 'Total post code: '+ str(len(postcode))
         index =0
@@ -285,12 +317,15 @@ class Unbiased_gb(BaseSite):
                 if ven.description.endswith(' | '):
                     ven.description = ven.description[0:len(ven.description)-2]
             #return ven
-            index = self.addIndex()
+            
+            #index = self.addIndex()
             
             
             #ven.is_get_by_address = True
             
-            ven.writeToFile(self.folder,index,ven.name.replace('/','-').replace(':',' '),False)
+            #ven.writeToFile(self.folder,index,ven.name.replace('/','-').replace(':',' '),False)
+
+            self.vens.append(ven)
     def __ServicesParser(self,url,xmlServices):        
         ''
     def appensList(self,arrays):

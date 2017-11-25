@@ -22,42 +22,30 @@ def main():
     working = Working()
     #working.do(sys.argv) #Comment this line then uncomment line below, if you want to run in Eclipse/PythonIDE
     #working.do(["", "url=https://www.gumtree.com"])
-    working.do(["", "url=https://www.unbiased.co.uk/"]) #374
+    #working.do(["", "url=https://www.unbiased.co.uk/"]) #374
     #working.do(["", "url=http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm.html"]) #373
     #working.do(["", "url=https://www.meilleur-garagiste.com"]) #387
     #working.do(["", "url=http://www.drivingschoolsfinder.co.uk/"]) # 391
     #working.do(["", "url=http://www.architecturalindex.com/"]) #399
     #working.do(["", "url=https://www.blauarbeit.de"]) #406
     #working.do(["", "url=https://yoganearby.com"]) #417
+    working.do(["", "url=http://es.qdq.com"]) #422
     print "DONE"
 
+def checkDup():
+    list__  =[]
+    list_ = [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,3,5,7,9]
+    for i in range(0,len(list_)):
+        for j in range(i+1,len(list_)):
+            if list_[i] == list_[j]:
+                list__.append(list_[j])
+    for a in list__:
+        list_.remove(a)
+    print str(list_)
 
-
-def loops(threadname):
-    for i in range(0,10):
-        
-        print 'Thread: '+threadname+ ' '+str(i)
-        time.sleep(0.2)
-        
-def test(country):
-    listchar =[]
-    for i in range(0,10) + [chr(x) for x in range(ord('a'), ord('z')+1)]:
-        listchar.append(str(i))
-    result = country+': '+ ','.join(listchar)
-    files=  open('D:\\multitest.txt','a')
-    files.write(result+'\r\n')
-    files.close()
-    print result+'\n'
-    return result
-def parse_(string):
-    try:
-        return int(string)
-    except Exception, ex:
-        print 'Ex1'
-def cfscrape(url):
-    scraper = cfscrape.create_scraper()
 if __name__ == '__main__':
-    #clickleft(103,164)
     main()
+    
+    #checkDup()
                               
                                    

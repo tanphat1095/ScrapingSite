@@ -1,0 +1,29 @@
+London	https://yoganearby.com/events/class/?latitude=51.5073509&longitude=-0.12775829999998223&location=London%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Birmingham	https://yoganearby.com/events/class/?latitude=52.48624299999999&longitude=-1.8904009999999971&location=Birmingham%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Glasgow	https://yoganearby.com/events/class/?latitude=55.864237&longitude=-4.251805999999988&location=Glasgow%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Liverpool	https://yoganearby.com/events/class/?latitude=53.4083714&longitude=-2.9915726000000404&location=Liverpool%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Edinburgh	https://yoganearby.com/events/class/?location=Edinburgh%2C+United+Kingdom&style=&level=0&day=&distance=100&longitude=-3.188266999999996&latitude=55.953252&time=
+Leeds	https://yoganearby.com/events/class/?latitude=53.8007554&longitude=-1.5490773999999874&location=Leeds%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Sheffield	https://yoganearby.com/events/class/?latitude=53.38112899999999&longitude=-1.47008500000004&location=Sheffield%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Bristol	https://yoganearby.com/events/class/?latitude=51.454513&longitude=-2.5879099999999653&location=Bristol%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Manchester	https://yoganearby.com/events/class/?latitude=53.4807593&longitude=-2.2426305000000184&location=Manchester%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Belfast	https://yoganearby.com/events/class/?latitude=54.59728500000001&longitude=-5.930119999999988&location=Belfast%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Cardiff	https://yoganearby.com/events/class/?latitude=51.48158100000001&longitude=-3.1790899999999738&location=Cardiff%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Leicester	https://yoganearby.com/events/class/?latitude=52.6368778&longitude=-1.1397591999999577&location=Leicester%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Coventry	https://yoganearby.com/events/class/?latitude=52.406822&longitude=-1.519692999999961&location=Coventry%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Wakefield	https://yoganearby.com/events/class/?latitude=53.683298&longitude=-1.50592400000005&location=Wakefield%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Wigan	https://yoganearby.com/events/class/?latitude=53.5450645&longitude=-2.6325074000000086&location=Wigan%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Kingston upon Hull	https://yoganearby.com/events/class/?latitude=53.7456709&longitude=-0.3367412999999715&location=Kingston+upon+Hull%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Doncaster	https://yoganearby.com/events/class/?latitude=53.52282&longitude=-1.1284620000000132&location=Doncaster%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Stockport	https://yoganearby.com/events/class/?latitude=53.41063159999999&longitude=-2.157533199999989&location=Stockport%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Bradford	https://yoganearby.com/events/class/?latitude=53.795984&longitude=-1.7593980000000329&location=Bradford%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Brighton	https://yoganearby.com/events/class/?latitude=50.82253000000001&longitude=-0.13716299999998682&location=Brighton%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Milton Keynes	https://yoganearby.com/events/class/?latitude=52.0406224&longitude=-0.7594171000000642&location=Milton+Keynes%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Stoke-on-Trent	https://yoganearby.com/events/class/?latitude=53.00266799999999&longitude=-2.179403999999977&location=Stoke-on-Trent%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Wolverhampton	https://yoganearby.com/events/class/?latitude=52.586973&longitude=-2.128820000000019&location=Wolverhampton%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Nottingham	https://yoganearby.com/events/class/?latitude=52.95478319999999&longitude=-1.1581085999999914&location=Nottingham%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Plymouth	https://yoganearby.com/events/class/?latitude=50.3754565&longitude=-4.14265649999993&location=Plymouth%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Southampton	https://yoganearby.com/events/class/?latitude=50.9097004&longitude=-1.404350900000054&location=Southampton%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Reading	https://yoganearby.com/events/class/?latitude=51.4542645&longitude=-0.9781302999999753&location=Reading%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Derby	https://yoganearby.com/events/class/?latitude=52.9225301&longitude=-1.4746185999999852&location=Derby%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
+Swansea	https://yoganearby.com/events/class/?latitude=51.62143999999999&longitude=-3.9436459999999443&location=Swansea%2C+United+Kingdom&distance=100&style=&level=0&day=&time=
