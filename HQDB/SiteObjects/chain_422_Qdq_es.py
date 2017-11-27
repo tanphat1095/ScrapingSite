@@ -156,9 +156,9 @@ class Qdq_es(BaseSite):
                         if itemprop =='postal-code':
                             ven.zipcode =span.text
                         if itemprop == 'locality':
-                            ven.city = span.text.split(',')[0]
-                            ven.city = ven.city.split('-')[0]
-                            ven.city = ven.city.split('/')[0]
+                            ven.city = span.text #.split(',')[0]
+                            '''ven.city = ven.city.split('-')[0]
+                            ven.city = ven.city.split('/')[0]'''
                 description = div.find('./p[@class="descripcion"]').text
                 if description!=None:
                     ven.description = description
@@ -179,7 +179,7 @@ class Qdq_es(BaseSite):
                             ven.mobile_number = self.validatePhone__(phone)
                         else:
                             ven.office_number = self.validatePhone__(phone)
-                #ven.is_get_by_address =True
+                ven.is_get_by_address =True
                 ven.writeToFile(self.folder, self.addIndex(), ven.name, False)   
             else:
                 print'Duplicate link'
@@ -214,9 +214,9 @@ class Qdq_es(BaseSite):
                     if itemprop =='postal-code':
                         ven.zipcode =span.text
                     if itemprop == 'locality':
-                        ven.city = span.text.split(',')[0]
-                        ven.city = ven.city.split('-')[0]
-                        ven.city = ven.city.split('/')[0]
+                        ven.city = span.text #.split(',')[0]
+                        '''ven.city = ven.city.split('-')[0]
+                        ven.city = ven.city.split('/')[0]'''
                 detail = Util.getRequestsXML(link, '//div[@id="contenido"]')
                 ven.name = detail.find('.//h1').text
                 phone = detail.find('.//span[@class="telefonoCliente"]')
@@ -232,7 +232,7 @@ class Qdq_es(BaseSite):
                 if maps!=None:
                     maps = maps.get('src')
                     (ven.latitude,ven.longitude) = self.getLatlng(maps)
-                #ven.is_get_by_address =True
+                ven.is_get_by_address =True
                 ven.writeToFile(self.folder, self.addIndex(), ven.name, False)
             else:
                 print 'Duplicate link'
