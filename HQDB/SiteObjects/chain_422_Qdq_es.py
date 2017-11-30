@@ -10,6 +10,7 @@ import threading
 import urllib3
 import phonenumbers
 from time import sleep
+import Common.Validation as Validator
 import time
 import requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -42,7 +43,6 @@ class Qdq_es(BaseSite):
         self.index =  index
         print 'Getting index: '+str(index)
         return index
-    
     
     def __init__(self, output="JSON_Results", isWriteList=None):
         BaseSite.__init__(self, output, self._chain_ + self.__name__)
@@ -77,15 +77,15 @@ class Qdq_es(BaseSite):
                     listCate = listCate.xpath('./a')
                     counting += len(listCate)
                     for cate in listCate:
-                        self.getListVenues(cate,subcate,cate.text)
+                        self.getListVenues(cate,cate.text)
                 else:
                     listCate_2 = li.xpath('./ul/li/a')
                     counting+= len(listCate_2)
                     for cate_2 in listCate_2:
-                        self.getListVenues(cate_2,subcate,cate_2.text)
+                        self.getListVenues(cate_2,cate_2.text)
         print 'Total: '+ str(counting)
     
-    def getListVenues(self,xmlElement,subcate,cate):
+    def getListVenues(self,xmlElement,cate):
         pages =-99
         while True:
             pages+=100
@@ -104,7 +104,9 @@ class Qdq_es(BaseSite):
                     break
                 while len(listVenues) > 0 :
                     if self.checkAlive()<10:
-                        thread1 = threading.Thread(target=self.__VenueParser,args=(listVenues[-1],subcate,cate))
+                        numbers+=1
+                        scrappages = link___+'#'+str(numbers)
+                        thread1 = threading.Thread(target=self.__VenueParser,args=(listVenues[-1],cate,scrappages))
                         self.threadRunning.append(thread1)
                         thread1.start()
                         listVenues.pop()
@@ -117,7 +119,7 @@ class Qdq_es(BaseSite):
                         '''thread2 = threading.Thread(target=self.__VenueParser_2,args=(listVenues_2[-1],subcate,cate,scrape_pages))
                         self.threadRunning.append(thread2)
                         thread2.start()'''
-                        self.__VenueParser_2(listVenues_2[-1], subcate, cate, scrape_pages)
+                        self.__VenueParser_2(listVenues_2[-1], cate, scrape_pages)
                         listVenues_2.pop()
                     else:
                         time.sleep(0.1)
@@ -130,23 +132,27 @@ class Qdq_es(BaseSite):
         
         
         
-    def __VenueParser_2(self,element,subcate,cate,scrape_pages):
+    def __VenueParser_2(self,element,cate,scrape_pages):
         subB = element.find('./div/a')
         link = subB.get('href')
+         
         try:
             existing=[x for x in self.listLink if link in x]
             if len(existing)<=0:
                 print 'Scraping Feature : '+ link
+                if link =='http://www.qdqplus.es/u4cwxsxmf/':
+                    print
                 self.listLink.append(link)
                 ven  = Venue()
                 ven.country =self._language
-                ven.hqdb_featured_ad_type ='Featured'
-                ven.category = subcate
-                ven.subcategory = cate
+                ven.hqdb_featured_ad_type ='featured'
+                ven.category = cate
+                #ven.subcategory = cate
                 ven.scrape_page = scrape_pages
                 subDiv = element.find('./div[@class="resultado nada"]')
                 div = subDiv.find('./a/div')
                 ven.name = div.find('./h2').text
+                ven.name = Validator.RevalidName(ven.name)
                 address =  div.xpath('./p[@itemprop="address"]/span')
                 if address!=None:
                     for span in address:
@@ -157,8 +163,16 @@ class Qdq_es(BaseSite):
                             ven.zipcode =span.text
                         if itemprop == 'locality':
                             ven.city = span.text #.split(',')[0]
-                            '''ven.city = ven.city.split('-')[0]
-                            ven.city = ven.city.split('/')[0]'''
+                            if ven.city=='' or ven.city ==None:
+                                continue
+                            find_slash = ven.city.find('/')
+                            find_comma = ven.city.find(',')
+                            if find_slash!=-1 and find_comma!=-1:
+                                ven.city = ven.city.split('/')[0]
+                                if ven.city.find(',')!=-1:
+                                    ven.city = ven.city.split(',')[1]
+                            ven.city = ven.city.split(',')[0]
+                            ven.city = ven.city.split('/')[0]
                 description = div.find('./p[@class="descripcion"]').text
                 if description!=None:
                     ven.description = description
@@ -179,14 +193,14 @@ class Qdq_es(BaseSite):
                             ven.mobile_number = self.validatePhone__(phone)
                         else:
                             ven.office_number = self.validatePhone__(phone)
-                ven.is_get_by_address =True
+                #ven.is_get_by_address =True
                 ven.writeToFile(self.folder, self.addIndex(), ven.name, False)   
             else:
                 print'Duplicate link'
         except Exception, ex:
             print ex
             print 'Error link: '+ scrape_pages
-    def __VenueParser(self,element,subcate, cate):  
+    def __VenueParser(self,element, cate,scrappages):  
         subA = element.find('./div/a')
         link = subA.get('href')      
         try:
@@ -201,9 +215,9 @@ class Qdq_es(BaseSite):
                 
                 ven = Venue()
                 #ven.name = subA.find('./div/h2').text
-                ven.scrape_page = link
-                ven.subcategory = cate
-                ven.category = subcate
+                ven.scrape_page = scrappages
+                #ven.subcategory = cate
+                ven.category = cate
                 ven.country = self._language
                 ven.hqdb_featured_ad_type="none"
                 address = subA.xpath('./div/p/span')
@@ -214,11 +228,27 @@ class Qdq_es(BaseSite):
                     if itemprop =='postal-code':
                         ven.zipcode =span.text
                     if itemprop == 'locality':
+                        
+                        
+                        
+                        # before the first "," and before the "/"
+                        
                         ven.city = span.text #.split(',')[0]
-                        '''ven.city = ven.city.split('-')[0]
-                        ven.city = ven.city.split('/')[0]'''
+                        if ven.city =='' or ven.city ==None:
+                            continue
+                        
+                        find_slash = ven.city.find('/')
+                        find_comma = ven.city.find(',')
+                        if find_slash!=-1 and find_comma!=-1:
+                            ven.city = ven.city.split('/')[0]
+                            if ven.city.find(',')!=-1:
+                                ven.city = ven.city.split(',')[1]
+                        ven.city = ven.city.split(',')[0]
+                        ven.city = ven.city.split('/')[0]
+            
                 detail = Util.getRequestsXML(link, '//div[@id="contenido"]')
                 ven.name = detail.find('.//h1').text
+                ven.name = Validator.RevalidName(ven.name)
                 phone = detail.find('.//span[@class="telefonoCliente"]')
                 if phone!=None:
                     phone = phone.text
@@ -232,7 +262,7 @@ class Qdq_es(BaseSite):
                 if maps!=None:
                     maps = maps.get('src')
                     (ven.latitude,ven.longitude) = self.getLatlng(maps)
-                ven.is_get_by_address =True
+                #ven.is_get_by_address =True
                 ven.writeToFile(self.folder, self.addIndex(), ven.name, False)
             else:
                 print 'Duplicate link'
