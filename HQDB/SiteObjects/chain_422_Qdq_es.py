@@ -37,6 +37,7 @@ class Qdq_es(BaseSite):
     countingVenues = 0
     listLink =[]
     threadRunning =[]
+    
     def addIndex(self):
         index = self.index
         index+=1
@@ -115,7 +116,7 @@ class Qdq_es(BaseSite):
                 while len(listVenues_2) >0:
                     if self.checkAlive()<10:
                         numbers+=1
-                        scrape_pages =  link___+ '#'+str(numbers)
+                        scrape_pages =  link___+ '#00'+str(numbers)
                         '''thread2 = threading.Thread(target=self.__VenueParser_2,args=(listVenues_2[-1],subcate,cate,scrape_pages))
                         self.threadRunning.append(thread2)
                         thread2.start()'''
@@ -140,8 +141,7 @@ class Qdq_es(BaseSite):
             existing=[x for x in self.listLink if link in x]
             if len(existing)<=0:
                 print 'Scraping Feature : '+ link
-                if link =='http://www.qdqplus.es/u4cwxsxmf/':
-                    print
+                
                 self.listLink.append(link)
                 ven  = Venue()
                 ven.country =self._language
@@ -151,8 +151,11 @@ class Qdq_es(BaseSite):
                 ven.scrape_page = scrape_pages
                 subDiv = element.find('./div[@class="resultado nada"]')
                 div = subDiv.find('./a/div')
-                ven.name = div.find('./h2').text
-                ven.name = Validator.RevalidName(ven.name)
+                ven.name = div.find('./h2').text #.replace('NiÃ±o','Niño')
+                '''if ven.name =='Niño de la Virgen':
+                    print'''
+                #ven.name = Validator.RevalidName(ven.name)
+                ven.name = self.replaceName(ven.name)
                 address =  div.xpath('./p[@itemprop="address"]/span')
                 if address!=None:
                     for span in address:
@@ -215,7 +218,7 @@ class Qdq_es(BaseSite):
                 
                 ven = Venue()
                 #ven.name = subA.find('./div/h2').text
-                ven.scrape_page = scrappages
+                ven.scrape_page = link
                 #ven.subcategory = cate
                 ven.category = cate
                 ven.country = self._language
@@ -247,8 +250,9 @@ class Qdq_es(BaseSite):
                         ven.city = ven.city.split('/')[0]
             
                 detail = Util.getRequestsXML(link, '//div[@id="contenido"]')
-                ven.name = detail.find('.//h1').text
-                ven.name = Validator.RevalidName(ven.name)
+                ven.name = detail.find('.//h1').text#.replace('NiÃ±o','Niño')
+                #ven.name = Validator.RevalidName(ven.name)
+                ven.name = self.replaceName(ven.name)
                 phone = detail.find('.//span[@class="telefonoCliente"]')
                 if phone!=None:
                     phone = phone.text
@@ -297,4 +301,11 @@ class Qdq_es(BaseSite):
             return None
         else:
             return phone
+    def replaceName(self,string):
+        listReplace=['MetÃ¡licos','NiÃ±o']
+        hashName ={"MetÃ¡licos":"Metálicos","NiÃ±o":"Niño"}
+        for li in listReplace:
+            if string.find(li)!=-1:
+                string = string.replace(li,hashName[li])
+        return string
     
