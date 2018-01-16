@@ -275,7 +275,7 @@ class Vetlook_ch(BaseSite):
         office2 =None
         mobile1 = None
         mobile2 =None
-        for phone in phoneNumber:
+        for phone in phoneNumber: ##
             if phone.startswith('+4'):
                 phone = phone.replace('(0)','')
             if phone.startswith('00'):
