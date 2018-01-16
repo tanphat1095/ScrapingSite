@@ -1,7 +1,8 @@
 #coding: utf-8
 from __future__ import unicode_literals
 from BaseSite import BaseSite
-from Common import Util, Validation
+from Common import Validation
+from Common import Util
 from Objects_HQDB import Service
 from Objects_HQDB import Venue
 import re
@@ -114,7 +115,7 @@ class Acca_gb(BaseSite):
                             time.sleep(1)       
                     countRequest+=1
                 print countr +' done'
-                #Util.log.running_logger.warning(countr+' done')
+                #Util.Util_backuprunning_logger.warning(countr+' done')
     def __VenueParser(self, link,countr):  
         ven = Venue()
         #link =  'http://www.accaglobal.com/uk/en/member/find-an-accountant/find-firm/results/details.html?isocountry=VN&location=&country=CZ&firmname=a&organisationid=ACCA&hid=&pagenumber=1&resultsperpage=25&requestcount=1&advisorid=2437095'

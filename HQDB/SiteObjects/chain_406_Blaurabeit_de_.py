@@ -1,7 +1,8 @@
 #coding: utf-8
 from __future__ import unicode_literals
 from BaseSite import BaseSite
-from Common import Util,Validation
+from Common import Validation
+from Common import Util
 from lxml import etree as ET
 from SiteObjects.Objects_HQDB import Venue, Service
 import re
@@ -539,7 +540,7 @@ class Blaurabeit_de(BaseSite):
             address = 'null'
             return (None,None)
         try:
-            jsonLatlng = Util.getGEOCode(address, countr)
+            jsonLatlng = UtiUtil_backuptGEOCode(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')
@@ -611,11 +612,11 @@ class Blaurabeit_de(BaseSite):
             parsed_phone = phonenumbers.parse(phone, country.upper(), _check_region=True)
         except phonenumbers.phonenumberutil.NumberParseException as error: 
                 print str(phone) +' can not parse'
-                Util.log.running_logger.warning(str(phone)+' : cannot parse')
+                UtiUtil_backupg.running_logger.warning(str(phone)+' : cannot parse')
                 return None
         if not phonenumbers.is_valid_number(parsed_phone):
             print str(phone) +': not number'
-            Util.log.running_logger.warning(str(phone)+' : not number')
+            UtiUtil_backupg.running_logger.warning(str(phone)+' : not number')
             return None
         else:
             return self.validatePhonecode(phone)     

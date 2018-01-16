@@ -6,7 +6,8 @@ Created on 28 thg 8, 2017
 #coding: utf-8
 from __future__ import unicode_literals
 from BaseSite import BaseSite
-from Common import Util,Validation
+from Common import Validation
+from Common import Util
 from lxml import etree as ET
 from SiteObjects.Objects_HQDB import Venue, Service
 import re

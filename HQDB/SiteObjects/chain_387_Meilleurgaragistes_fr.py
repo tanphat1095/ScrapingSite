@@ -1,7 +1,8 @@
 #coding: utf-8
 from __future__ import unicode_literals
 from BaseSite import BaseSite
-from Common import Util,Validation
+from Common import Validation
+from Common import Util
 from lxml import etree as ET
 from SiteObjects.Objects_HQDB import Venue, Service
 import re
@@ -369,7 +370,7 @@ class Meilleurgaragistes_fr(BaseSite):
         return xml
     def getLatlng(self,address,countr):
         try:
-            jsonLatlng = Util.getGEOCode(address, countr)
+            jsonLatlng = Util.getRequestsXML(address, countr)
             if jsonLatlng !=None:
                 if jsonLatlng.get('status') =='OK':
                     result =  jsonLatlng.get('results')

@@ -1,7 +1,8 @@
 #coding: utf-8
 from __future__ import unicode_literals
 from BaseSite import BaseSite
-from Common import Util,Validation
+from Common import Validation
+from Common import Util
 from lxml import etree as ET
 from SiteObjects.Objects_HQDB import Venue, Service
 import re
@@ -37,7 +38,7 @@ class Qdq_es(BaseSite):
     countingVenues = 0
     listLink =[]
     threadRunning =[]
-    
+    remove__ =['<br>','<br/>','<Br>','<Br/>']
     def addIndex(self):
         index = self.index
         index+=1
@@ -52,6 +53,11 @@ class Qdq_es(BaseSite):
     
     
     def doWork(self):
+    
+        string = '15863 A Baña'
+        print self.validateStreet(string)
+        
+        
         self.phoneCodeList = Util.getPhoneCodeList()
         try:
             self.__getListVenues()
@@ -87,12 +93,16 @@ class Qdq_es(BaseSite):
         print 'Total: '+ str(counting)
     
     def getListVenues(self,xmlElement,cate):
-        pages =-99
+        pages =-100
         while True:
             pages+=100
             numbers= 0
             try:
-                link___ = xmlElement.get('href')+'/pag-'+str(pages)+'/rows-99/s:/'
+                link___ = xmlElement.get('href')+'/pag-'+str(pages)+'/rows-100/s:/'
+                
+                #link___ ='http://es.qdq.com/abastecimiento+de+agua/'
+                
+                
                 listVenues__ = Util.getRequestsXML(link___, '//div[@id="listadoResultados"]')
                 listVenues = listVenues__.xpath('//li[@class="estirar gratuito"]')
                 listVenues_2 = listVenues__.xpath('//li[@class="estirar "]')
@@ -176,6 +186,39 @@ class Qdq_es(BaseSite):
                                     ven.city = ven.city.split(',')[1]
                             ven.city = ven.city.split(',')[0]
                             ven.city = ven.city.split('/')[0]
+                    if ven.street !=None:
+                        ven.street = self.validateStreet(ven.street)
+                    if ven.city!=None:
+                        re_City =  re.search('(?:(?:[1-9]{2}|[0-9][1-9]|[1-9][0-9])[0-9]{3})', ven.city, flags=0)   
+                        if re_City!=None:
+                            ven.city = ven.city.replace(re_City.group(0),'')
+                    if ven.zipcode!=None:
+                        ven.zipcode = ven.zipcode.strip()
+                        if len(ven.zipcode)>=5:
+                            re_zipcode = re.search('(?:(?:[1-9]{2}|[0-9][1-9]|[1-9][0-9])[0-9]{3})', ven.zipcode, flags=0)
+                            if re_zipcode!=None:
+                                if re_zipcode.group(0)!=ven.zipcode:
+                                    ven.zipcode =None
+                            else:
+                                ven.zipcode =None
+                        else:
+                            ven.zipcode = '0'+ven.zipcode
+                            rezipcode = re.search('(?:(?:[1-9]{2}|[0-9][1-9]|[1-9][0-9])[0-9]{3})', ven.zipcode, flags=0)
+                            if rezipcode == None:
+                                ven.zipcode = None
+                            else:
+                                if ven.zipcode != rezipcode.group(0):
+                                    ven.zipcode =None
+                    
+                            
+                try:
+                    if int(ven.zipcode) >52080 or int(ven.zipcode) <1000:
+                        ven.zipcode = None
+                except Exception,ex:
+                    ven.zipcode = None           
+                            
+                            
+                            
                 description = div.find('./p[@class="descripcion"]').text
                 if description!=None:
                     ven.description = description
@@ -248,7 +291,37 @@ class Qdq_es(BaseSite):
                                 ven.city = ven.city.split(',')[1]
                         ven.city = ven.city.split(',')[0]
                         ven.city = ven.city.split('/')[0]
-            
+                if ven.street !=None:
+                    ven.street = self.validateStreet(ven.street)
+                if ven.city!=None:
+                    re_City =  re.search('(?:(?:[1-9]{2}|[0-9][1-9]|[1-9][0-9])[0-9]{3})', ven.city, flags=0)   
+                    if re_City!=None:
+                        ven.city = ven.city.replace(re_City.group(0),'')
+                if ven.zipcode!=None:
+                    ven.zipcode = ven.zipcode.strip()
+                    if len(ven.zipcode)>=5:
+                        re_zipcode = re.search('(?:(?:[1-9]{2}|[0-9][1-9]|[1-9][0-9])[0-9]{3})', ven.zipcode, flags=0)
+                        if re_zipcode!=None:
+                            if re_zipcode.group(0)!=ven.zipcode:
+                                ven.zipcode =None
+                        else:
+                            ven.zipcode =None
+                    else:
+                        ven.zipcode = '0'+ven.zipcode
+                        rezipcode = re.search('(?:(?:[1-9]{2}|[0-9][1-9]|[1-9][0-9])[0-9]{3})', ven.zipcode, flags=0)
+                        if rezipcode == None:
+                            ven.zipcode = None
+                        else:
+                            if ven.zipcode != rezipcode.group(0):
+                                ven.zipcode =None
+                  
+                  
+                try:
+                    if int(ven.zipcode) >52080 or int(ven.zipcode) <1000:
+                        ven.zipcode = None
+                except Exception,ex:
+                    ven.zipcode = None  
+                    
                 detail = Util.getRequestsXML(link, '//div[@id="contenido"]')
                 ven.name = detail.find('.//h1').text#.replace('NiÃ±o','Niño')
                 #ven.name = Validator.RevalidName(ven.name)
@@ -288,6 +361,22 @@ class Qdq_es(BaseSite):
     
     def __ServicesParser(self,url,xmlServices):        
         ''
+    def validateStreet(self,string):
+        regex_ = ['([\d]{5,20})','([\d]{3,10}-[\d]{3,10})']
+        for reg in regex_:
+            result = re.search(reg, string, flags=0)
+            if result!=None:
+                string=  string.replace(result.group(0),'')
+        return self.remove_specialChar(string)
+    def remove_specialChar(self,string):
+        for rem in self.remove__:
+            string = string.replace(rem,'')
+        string = string.strip()
+        if string.startswith(','):
+            string = string[1:len(string)]
+        if string.endswith(','):
+            string = string[0:len(string)-1]
+        return string.replace(', ,',',').replace(',,',',')
     def validatePhone__(self,phone):        
         try:
             parsed_phone = phonenumbers.parse(phone, self._language.upper(), _check_region=True)
@@ -302,8 +391,8 @@ class Qdq_es(BaseSite):
         else:
             return phone
     def replaceName(self,string):
-        listReplace=['MetÃ¡licos','NiÃ±o']
-        hashName ={"MetÃ¡licos":"Metálicos","NiÃ±o":"Niño"}
+        listReplace=['MetÃ¡licos','NiÃ±o','SerigrafÃ­a']
+        hashName ={"MetÃ¡licos":"Metálicos","NiÃ±o":"Niño","SerigrafÃ­a":"Serigrafía"}
         for li in listReplace:
             if string.find(li)!=-1:
                 string = string.replace(li,hashName[li])

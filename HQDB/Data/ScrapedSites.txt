@@ -10,3 +10,7 @@ https://www.blauarbeit.de; SiteObjects.chain_406_Blaurabeit_de_; Blaurabeit_de
 https://yoganearby.com; SiteObjects.chain_417_Yoganearby_gb; Yoganearby_gb
 http://es.qdq.com; SiteObjects.chain_422_Qdq_es; Qdq_es
 http://www.garagesandrecovery.co.uk; SiteObjects.chain_427_GaragesAndRecovery_gb; GaragesAndRecovery_gb
+http://www.uksecurity-directory.co.uk; SiteObjects.chain_431_SecurityCompanies_gb; SecurityCompanies_gb
+http://www.computer-systems-uk.co.uk; SiteObjects.chain_436_ComputerSystemsUK; ComputerSystemsUK_gb
+http://www.serrurier-a-paris.info; SiteObjects.chain_440_Serrurier_a_paris_in_fr; Serrurier_a_paris_in_fr
+http://www.vet-look.ch; SiteObjects.chain_442_Vetlook_ch; Vetlook_ch

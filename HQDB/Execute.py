@@ -29,22 +29,22 @@ def main():
     #working.do(["", "url=http://www.architecturalindex.com/"]) #399
     #working.do(["", "url=https://www.blauarbeit.de"]) #406
     #working.do(["", "url=https://yoganearby.com"]) #417
-    working.do(["", "url=http://es.qdq.com"]) #422
-    #working.do(["", "url=http://www.garagesandrecovery.co.uk"]) 
+    #working.do(["", "url=http://es.qdq.com"]) #422
+    #working.do(["", "url=http://www.garagesandrecovery.co.uk"])   #427
+    #working.do(["", "url=http://www.uksecurity-directory.co.uk"])   #431 
+    #working.do(["", "url=http://www.computer-systems-uk.co.uk"]) #436
+    #working.do(["", "url=http://www.serrurier-a-paris.info"]) #440
+    working.do(["", "url=http://www.vet-look.ch"]) #442 
+    
+    
     print "DONE"
 
-def checkDup():
-    list__  =[]
-    list_ = [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,3,5,7,9]
-    for i in range(0,len(list_)):
-        for j in range(i+1,len(list_)):
-            if list_[i] == list_[j]:
-                list__.append(list_[j])
-    for a in list__:
-        list_.remove(a)
-    print str(list_)
 
 if __name__ == '__main__':
+
+    
+    
+    
     main()
     
     #checkDup()

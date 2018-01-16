@@ -137,7 +137,7 @@ def ReValidString(value):
         value = value.replace('\\xe2\\x80\\x93','-')#&ndash <->;
         value = value.replace('\\xc2\\x81','')
         value = value.replace('\\xe2\\x80\\xa2','-')#replace bullet by dash
-
+        value = value.replace('\\xe2\\x80\\x8b','')#
         value = value.decode('string-escape').decode('utf8')
         if value == "":
             return None
@@ -154,18 +154,18 @@ def ValidateGeoCode(fulladdress,country,lat,lng,scrape_page=None):
         if jsonLocation != None and jsonLocation.get('status').upper() == 'OK':
             latLo = str(jsonLocation.get('results')[0].get('geometry').get('location').get('lat'))
             lngLo = str(jsonLocation.get('results')[0].get('geometry').get('location').get('lng'))
-            dotIndex = latLo.find('.') + 3
-            for c in range(min(dotIndex,len(lat))):
+            dotIndex = min(len(latLo), latLo.find('.') + 3)
+            for c in range(0,min(dotIndex,len(lat))):
                 if lat[c] != latLo[c]:
-                    Util.log.coordinate_logger.error(scrape_page + ': invalid GEO code (' + lat + ',' + lng + ')')
-                    return False            
-            dotIndex = lngLo.find('.') + 3
-            for c in range(min(dotIndex,len(lng))):
+                    Util.log.coordinate_logger.error(scrape_page + ': invalid latitude (' + lat + ',' + lng + ')')
+                    return False
+            dotIndex = min(len(lngLo), lngLo.find('.') + 3)
+            for c in range(0,min(dotIndex,len(lng))):
                 if lng[c] != lngLo[c]:
-                    Util.log.coordinate_logger.error(scrape_page + ': invalid GEO code (' + lat + ',' + lng + ')')
+                    Util.log.coordinate_logger.error(scrape_page + ': invalid longitude (' + lat + ',' + lng + ')')
                     return False
         else:
-            Util.log.coordinate_logger.warning(fulladdress + ',' + country + ': cannot get GEO code')            
+            Util.log.coordinate_logger.warning(fulladdress + ',' + country + ': cannot get GEO code ' + jsonLocation.get('status').upper())            
     return True
 
 def CheckURL(url):
@@ -199,17 +199,19 @@ def is_valid_email(email):
 
 def RevalidEmail(email):
     try:
-        mongo_validator = EmailField()
-        mongo_validator.validate(email)
-        return True
+        if email != None:
+            mongo_validator = EmailField()
+            mongo_validator.validate(email)
+            return True
     except:
         return False
 
 def RevalidURL(url):
     try:
-        mongo_validator = URLField()
-        mongo_validator.validate(url)
-        return True
+        if url != None:
+            mongo_validator = URLField()
+            mongo_validator.validate(url)
+            return True
     except:
         return False
 
