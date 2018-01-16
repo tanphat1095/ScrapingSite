@@ -41,7 +41,11 @@ def main():
 
 
 if __name__ == '__main__':
-
+    dict = {'1':'a','3':'a'}
+    dict['2'] = 'd'
+    print dict
+    dict.pop('1')
+    print dict
     
     
     
