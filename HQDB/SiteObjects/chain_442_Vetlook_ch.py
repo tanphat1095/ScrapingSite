@@ -157,19 +157,42 @@ class Vetlook_ch(BaseSite):
                 ven.business_website = a
                 td.remove(div)
             basicInfo = ''.join(td.itertext())
+            #basicInfo =td.text
+            
+            if self.urlmarks == 46:
+                pass
+            
+            
+            
+            
+            
+            street = ''
+            contactName = ''
+            name =''
+            
             basicInfo_ =  basicInfo.split('\n')
             if basicInfo_[len(basicInfo_)-1].find('Fax')!=-1:
                 basicInfo_ = basicInfo_[0:-1]
-            phoneNumber = basicInfo_[-1].strip().replace('Tel.','').replace(' ','')
-            local =  basicInfo_[-2]
-            street = basicInfo_[-3]
-            contactName = basicInfo_[-4]
-            name = ' '.join(basicInfo_[0:-4])
+            positionInArr = -1
+            phoneNumber = basicInfo_[positionInArr].strip().replace('Tel.','').replace(' ','')
+            positionInArr-=1
+            local =  basicInfo_[positionInArr]
+            positionInArr-=1
+            street = basicInfo_[positionInArr]
+            if self.isContactName(street)==True:
+                contactName = street
+                street =''
+                positionInArr+=1
+            positionInArr-=1
+            if contactName=='':
+                contactName = basicInfo_[positionInArr]
             
+            if self.isContactName(contactName)==False:
+                positionInArr+=1
+                contactName =''
+            name = ' '.join(basicInfo_[0:positionInArr])
             
-            #if name.strip() =='Kleintierpraxis':
-            #    name = 'piccoli animal
-                
+         
                 
                 
             (ven.office_number,ven.office_number2,ven.mobile_number,ven.mobile_number2) = self.processPhone([phoneNumber])
@@ -186,7 +209,12 @@ class Vetlook_ch(BaseSite):
         except Exception, ex:
             print ex
             
-            
+    def isContactName(self,string):
+        keywords = [' met.',' vet.',' Dr.']
+        for key in keywords:
+            if string.upper().find(key.upper())!=-1:
+                return True
+        return False
     def filterVenues(self):
         listRemove = []
         
