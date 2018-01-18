@@ -159,7 +159,7 @@ class Vetlook_ch(BaseSite):
             basicInfo = ''.join(td.itertext())
             #basicInfo =td.text
             
-            if self.urlmarks == 46:
+            if self.urlmarks == 881:
                 pass
             
             
@@ -210,10 +210,12 @@ class Vetlook_ch(BaseSite):
             print ex
             
     def isContactName(self,string):
-        keywords = [' met.',' vet.',' Dr.']
-        for key in keywords:
-            if string.upper().find(key.upper())!=-1:
-                return True
+        keywords = ['met.','vet.','Dr.']
+        string_ =string.split()
+        for st in string_:
+            for key in keywords:
+                if st.upper().strip()==key.upper():
+                    return True
         return False
     def filterVenues(self):
         listRemove = []
@@ -304,10 +306,16 @@ class Vetlook_ch(BaseSite):
         mobile1 = None
         mobile2 =None
         for phone in phoneNumber: ##
-            if phone.startswith('+4'):
+            if phone.startswith('+4') or phone.startswith('041') or phone.startswith('0041') :
                 phone = phone.replace('(0)','')
             if phone.startswith('00'):
                 phone = '+'+ phone[2:len(phone)]
+            if phone.startswith('041'):
+                phone =  '+'+ phone[1:len(phone)]
+            if phone.startswith('(0)55'):
+                phone = '+41'+ phone.replace('(0)','')
+            if phone.startswith('+410'):
+                phone = '+41'+ phone[4:len(phone)]
             if phone.startswith('+417'):
                 if mobile1==None:
                      mobile1 =  self.validatePhone__(phone)
