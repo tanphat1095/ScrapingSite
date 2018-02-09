@@ -58,7 +58,7 @@ class Computerrepairsmaintenanceuk_gb(BaseSite):
     def doWork(self):
      
         self.phoneCodeList = Util.getPhoneCodeList()
-        print self.getID_FB_TW('https://www.twitter.com/bullit_aberdeen')
+        print self.getID_FB_TW('https://www.twitter.com/pages/asdasd/bullit_aberdeen')
         #get by rergion
         #self.getListRegion()
         
@@ -296,6 +296,13 @@ class Computerrepairsmaintenanceuk_gb(BaseSite):
         while (isReplace ==True):
             url = url[0:-1]
             isReplace = url.endswith('/')
+        
+        
+        
+        #array_ =  url.split('/')
+        #results  = '/'.join(array_[3:len(array_)])
+        #return   results[1:len(results)]
+        
         return url.split('/')[-1]
                 
     def addHTTP(self, string):
@@ -362,6 +369,10 @@ class Computerrepairsmaintenanceuk_gb(BaseSite):
                 sers =  Service()
                 sers.service= ser_.find('.//div[@class="listing-header"]/div/a').text
                 sers.description = ' '.join(ser_.find('.//div[@class="listing-content"]').itertext())
+                subHeader = ser_.find('.//div[@class="listing-subheader"]')
+                if subHeader !=None:
+                    sers.description = ' '.join(subHeader.itertext())+ ' | '+ sers.description
+                
                 service__.append(sers)
             return service__
         else:
