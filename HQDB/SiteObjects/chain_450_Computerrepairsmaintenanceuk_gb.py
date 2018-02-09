@@ -16,20 +16,20 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-class ComputerSystemsUK_gb(BaseSite):
+class Computerrepairsmaintenanceuk_gb(BaseSite):
     '''
     Get information from ""
     '''
     phoneCodeList = None
     
     
-    __url__ = 'http://www.computer-systems-uk.co.uk'
+    #__url__ = 'http://www.computer-systems-uk.co.uk'
     
-    #__url__ ='http://www.computer-repairs-maintenance.co.uk'
+    __url__ ='http://www.computer-repairs-maintenance.co.uk'
     
     _language = 'gb'
-    _chain_ = 'chain_436_'
-    __name__ = 'Computer Systems UK'
+    _chain_ = 'chain_450_'
+    __name__ = 'Computer Repairs Maintenance UK'
     _url_lstVenues = ''    
     _xpath_lstVenues = ''        
     _url_lstServices = ''
@@ -43,9 +43,9 @@ class ComputerSystemsUK_gb(BaseSite):
     
     RunningThread= []
     
-    urlSearch = 'http://www.computer-systems-uk.co.uk/search?q='
+    #urlSearch = 'http://www.computer-systems-uk.co.uk/search?q='
     
-    #urlSearch= 'http://www.computer-repairs-maintenance.co.uk/search?q='
+    urlSearch= 'http://www.computer-repairs-maintenance.co.uk/search?q='
     
     ukReg = '((?:[gG][iI][rR] {0,}0[aA]{2})|(?:(?:(?:[a-pr-uwyzA-PR-UWYZ][a-hk-yA-HK-Y]?[0-9][0-9]?)|(?:(?:[a-pr-uwyzA-PR-UWYZ][0-9][a-hjkstuwA-HJKSTUW])|(?:[a-pr-uwyzA-PR-UWYZ][a-hk-yA-HK-Y][0-9][abehmnprv-yABEHMNPRV-Y]))) {0,}[0-9][abd-hjlnp-uw-zABD-HJLNP-UW-Z]{2}))'
     listLink =[]
@@ -58,7 +58,7 @@ class ComputerSystemsUK_gb(BaseSite):
     def doWork(self):
      
         self.phoneCodeList = Util.getPhoneCodeList()
-        
+        print self.getID_FB_TW('https://www.twitter.com/bullit_aberdeen')
         #get by rergion
         #self.getListRegion()
         
@@ -87,7 +87,7 @@ class ComputerSystemsUK_gb(BaseSite):
         #file = open('Data/EngCity.txt','r')
         postcodes = file.read().splitlines()
         while len(postcodes)>0:
-            if self.numOfThread()<=6:
+            if self.numOfThread()<6:
                 cod =  postcodes[-1]
                 Util.log.running_logger.info("Find with postcode :"+cod)
                 thread__ = threading.Thread(target= self.__getListVenues,args=(self.urlSearch+str(cod),))
@@ -156,6 +156,17 @@ class ComputerSystemsUK_gb(BaseSite):
                     ven = Venue()
                     ven.name = xmlDoc.find('.//div[@class="page-heading"]//h1').text
                     content = xmlDoc.find('.//div[@class="container page-content"]')
+                    
+                    
+                    
+                    serviceElement  = content.xpath('//div[@id="services"]/parent::div')
+                    if len(serviceElement)>0:
+                        ven.services = self.__ServicesParser(ven.scrape_page, serviceElement[0])  
+                    
+                    
+                    
+                    
+                    
                     if content!=None:
                         des_img = content.find('.//div[@class="article-body"]')
                         if des_img!=None:
@@ -202,12 +213,13 @@ class ComputerSystemsUK_gb(BaseSite):
                             for li in li__:
                                 if li.get('class')!='text-bold':
                                     address = '\n'.join(li.itertext())
+                                    ven.formatted_address =  address.replace('\n', ' ')
                                     addressArr =  address.split('\n')
-                                    if len(addressArr)>=3:
+                                    '''if len(addressArr)>=3:
                                         ven.street = addressArr[len(addressArr)-3]
                                         if ven.street == '2 Orchard Mill, Riversdale, Bourne End, SL8 5XP':
-                                            ven.street = ven.street.replace(', Bourne End, SL8 5XP','')
-                                    ven.city = addressArr[len(addressArr)-2].split(',')[0]
+                                            ven.street = ven.street.replace(', Bourne End, SL8 5XP','')'''
+                                    #ven.city = addressArr[len(addressArr)-2].split(',')[0]
                                     ven.zipcode = addressArr[len(addressArr)-1]
                                     if ven.zipcode!=None:
                                         results = re.search(self.ukReg, ven.zipcode, flags=0)
@@ -239,7 +251,7 @@ class ComputerSystemsUK_gb(BaseSite):
                                 follow_link = foll.get('href')
                                 if follow_link.find('facebook.com')!=-1:
                                     if ven.facebook==None:
-                                        ven.facebook =  self.addHTTP(follow_link)
+                                        ven.facebook =  self.getID_FB_TW(follow_link)   #self.addHTTP(follow_link)
                                 if follow_link.find('twitter.com')!=-1:
                                     if ven.twitter ==None:
                                         ven.twitter = self.addHTTP(follow_link)
@@ -251,7 +263,7 @@ class ComputerSystemsUK_gb(BaseSite):
                                     
                                     
                                     
-                                    
+                              
                                     
                         img_find = xmlDoc.xpath('//div[@id="galleries"]/parent::div/div[@class="carousel slide equal-height"]//img')
                         for ig in img_find :
@@ -263,6 +275,9 @@ class ComputerSystemsUK_gb(BaseSite):
                         self.index+=1
                         ven.writeToFile(self.folder, self.index, ven.name, False)
                         #img_link : //div[@id="galleries"]/parent::div/div[@class="carousel slide equal-height"]//img
+                 
+                 
+                 
                     
                 else: 
                     print '\nduplicate'.upper()
@@ -275,7 +290,14 @@ class ComputerSystemsUK_gb(BaseSite):
         except Exception, ex:
             print ex
             
-            
+    def getID_FB_TW(self,url):
+        url = url.strip()
+        isReplace = url.endswith('/')
+        while (isReplace ==True):
+            url = url[0:-1]
+            isReplace = url.endswith('/')
+        return url.split('/')[-1]
+                
     def addHTTP(self, string):
         if string.startswith('http'):
             ''
@@ -329,5 +351,25 @@ class ComputerSystemsUK_gb(BaseSite):
         else:
             return phone     
     def __ServicesParser(self,url,xmlServices):        
-        ''
+        services = xmlServices.find('./div[@class="listing-group"]')
+        if services !=None:
+            service__ =[]
+            service =  services.xpath('./div')
+            for ser in service:
+                if ser.get('class').strip() =='listing-divider':
+                    service.remove(ser)
+            for ser_ in service:
+                sers =  Service()
+                sers.service= ser_.find('.//div[@class="listing-header"]/div/a').text
+                sers.description = ' '.join(ser_.find('.//div[@class="listing-content"]').itertext())
+                service__.append(sers)
+            return service__
+        else:
+            return None
+        
+        
+        
+        
+        
+        
     

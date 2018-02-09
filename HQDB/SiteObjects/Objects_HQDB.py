@@ -95,9 +95,9 @@ class Venue(object):
         self.longitude = Validator.ReValidString(self.longitude)
         self.business_email = Validator.RevalidEmail(Validator.ReValidString(self.business_email))
         self.yelp_page = Validator.RevalidURL(self.yelp_page)
-        self.facebook = Validator.RevalidURL(self.facebook)
+        #self.facebook = Validator.RevalidURL(self.facebook)
         self.twitter = Validator.RevalidURL(self.twitter)
-        self.instagram = Validator.RevalidURL(self.instagram)
+        #self.instagram = Validator.RevalidURL(self.instagram)
         self.venue_images = Validator.ReValidString(self.venue_images)
         if self.is_get_by_address == False:        
             if Validator.ValidateGeoCode(self.formatted_address,self.country,self.latitude,self.longitude) == False:            
@@ -196,12 +196,14 @@ class Venue(object):
                 self.business_email = None
         if self.yelp_page != None and Validator.RevalidURL(self.yelp_page) == False:
             self.yelp_page = None
-        if self.facebook != None and Validator.RevalidURL(self.facebook) == False:
-            self.facebook = None
+        #if self.facebook != None and Validator.RevalidURL(self.facebook) == False:
+        #    self.facebook = None
+        
+        
         if self.twitter != None and Validator.RevalidURL(self.twitter) == False:
             self.twitter = None
-        if self.instagram != None and Validator.RevalidURL(self.instagram) == False:
-            self.instagram = None        
+        #if self.instagram != None and Validator.RevalidURL(self.instagram) == False:
+        #    self.instagram = None        
         self.venue_images = Validator.ReValidString(self.venue_images) 
         if self.venue_images != None:
             self.venue_images = self.venue_images.replace(' ','%20')

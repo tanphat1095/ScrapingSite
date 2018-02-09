@@ -15,3 +15,5 @@ http://www.computer-systems-uk.co.uk; SiteObjects.chain_436_ComputerSystemsUK; C
 http://www.serrurier-a-paris.info; SiteObjects.chain_440_Serrurier_a_paris_in_fr; Serrurier_a_paris_in_fr
 http://www.vet-look.ch; SiteObjects.chain_442_Vetlook_ch; Vetlook_ch
 https://osteofrance.com; SiteObjects.chain_443_Osteopathesdefrance_fr; Osteopathesdefrance_fr
+http://www.hondentrimsalon.nl; SiteObjects.chain_449_Hondentrimsalon_nl; Hondentrimsalon_nl
+http://www.computer-repairs-maintenance.co.uk; SiteObjects.chain_450_Computerrepairsmaintenanceuk_gb; Computerrepairsmaintenanceuk_gb
