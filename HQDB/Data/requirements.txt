@@ -62,7 +62,7 @@ ruamel.yaml==0.15.34
 selenium==3.4.3
 singledispatch==3.4.0.3
 six==1.10.0
-SQLAlchemy==1.2.0b1
+SQLAlchemy==1.3.0
 tzlocal==1.4
 umalqurra==0.2
 unicodecsv==0.14.1
